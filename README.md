@@ -2,7 +2,7 @@
 
 > **Wind 万得金融 Skill 集合（monorepo）** · 通过 MCP 协议把万得金融数据接入 Claude / OpenClaw / Hermes 等 AI Agent，并一站式收录 wind 自家数据 + 社区分析工作流共 12 个金融 skill
 
-[![GitHub](https://img.shields.io/badge/GitHub-JsonCodeChina%2Fwind--skills-blue?logo=github)](https://github.com/JsonCodeChina/wind-skills)
+[![GitHub](https://img.shields.io/badge/GitHub-Wind--Information--Co--Ltd%2Fwind--skills-blue?logo=github)](https://github.com/Wind-Information-Co-Ltd/wind-skills)
 
 ---
 
@@ -38,28 +38,38 @@
 
 ## 🚀 安装
 
+### 📍 关于安装位置（先看一眼）
+
+下方所有命令默认带 `-g`（全局）：
+- ✅ **全局** `-g`：装一次，所有项目 + 机器上**所有已识别的 AI agent** 都能用（Claude Code / Cursor / OpenClaw / Hermes 等）。
+- 🔒 **仅当前项目**：把命令里的 `-g` **去掉**即可。只装到当前目录，不影响其它项目 / agent。
+
+不确定就用全局（适合金融机构内网跨项目复用）。
+
 ### 推荐入口：先装金融能力发现器
 
 ```bash
 # GitHub
-npx skills add JsonCodeChina/wind-skills --skill wind-find-finance-skill -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-find-finance-skill -g -y
 
 # Gitee 镜像（国内）
-npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-find-finance-skill -g -y
+npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-find-finance-skill -g -y
 ```
+
+> 想限制在当前项目内，去掉 `-g` 即可。
 
 装好后，用户直接问金融问题即可。AI 会通过 SKILL.md 守则按用户问题筛 1-3 个相关 skill 推荐安装。
 
-机器可读引导文件见 [`skill.md`](./skill.md)。可发布到：
+机器可读引导文件见 [`README-skills.md`](./README-skills.md)。可发布到：
 
 ```text
-https://aimarket.wind.com.cn/skill.md
+https://aimarket.wind.com.cn/
 ```
 
 ### 装单个 skill
 
 ```bash
-npx skills add JsonCodeChina/wind-skills --skill <skill-name> -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill <skill-name> -g -y
 ```
 
 把 `<skill-name>` 换成上方表格里的任意 Skill 名称即可。
@@ -67,10 +77,10 @@ npx skills add JsonCodeChina/wind-skills --skill <skill-name> -g -y
 ### 列出仓库内所有可装 skill
 
 ```bash
-npx skills add JsonCodeChina/wind-skills --list
+npx skills add Wind-Information-Co-Ltd/wind-skills --list
 ```
 
-> `-g` 装到所有已识别的 agent（Claude Code / Desktop / OpenClaw / Hermes 等）；`-y` 跳过交互菜单。
+> `-y` 跳过交互菜单（必加）。`-g` 含义见上方"关于安装位置"段。
 
 ---
 
