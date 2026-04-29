@@ -65,7 +65,7 @@ aimarket.wind.com.cn 拿 API Key
 
 # 参数说明(必读)
 
-- **`-g` / `--global`**:装到 `~/.agents/skills/`(用户级,跨项目共享,金融机构内网友好)
+- **`-g` / `--global`**:装到用户级全局 skill 位置(跨项目共享,金融机构内网友好。具体路径由 npx skills 决定)
 - **`-y` / `--yes`**:**必加**,跳过交互菜单(不加会卡)
 - **`--skill <name>`**:从 monorepo 抽指定子 skill 装;不写会装全部 skill
 

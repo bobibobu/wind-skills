@@ -78,7 +78,7 @@ npx skills add JsonCodeChina/wind-skills --list
 
 ### 让 AI 帮你打开开发者中心拿 Key（推荐）
 
-装好 wind-mcp-skill 后，第一次问行情 / 基金 / 财务 / 公告问题，AI 会发现没 Key 并**主动询问**："要我现在帮你打开万得开发者中心吗？" 同意后，AI 在 skill 目录下运行：
+装好 wind-mcp-skill 后，第一次问行情 / 基金 / 财务 / 公告问题，AI 会发现没 Key 并**主动询问**："要我现在帮你打开万得开发者中心吗？" 同意后，AI 在 SKILL.md 所在目录下运行：
 
 ```bash
 node scripts/cli.mjs open-portal
@@ -98,7 +98,7 @@ mkdir -p ~/.wind-aimarket && echo "WIND_API_KEY=ak_xxx" > ~/.wind-aimarket/confi
 ### 三级兜底（按优先级）
 
 1. 环境变量 `WIND_API_KEY`
-2. skill 目录内 `config.json`
+2. SKILL.md 同目录 `config.json`
 3. 全局 `~/.wind-aimarket/config`（**推荐**，所有 wind skill 共享）
 
 ---

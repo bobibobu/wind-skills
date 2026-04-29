@@ -26,7 +26,7 @@ examples:
 
 访问万得 Wind 金融数据：股票（行情与财务基本面）、基金（行情与全维数据）、上市公司公告与新闻、宏观经济指标。
 
-> ⚠️ **关键约束 · 运行环境**：所有 `node scripts/cli.mjs ...` 命令**必须在本 skill 根目录下运行**（cwd = skill 安装路径）。脚本依赖相对路径加载 `config.json`、写 `~/.cache/wind-aimarket/tools/` 缓存。常见安装路径：`~/.claude/skills/wind-mcp-skill/`、`~/.agents/skills/wind-mcp-skill/`、`~/.openclaw/workspace/skills/wind-mcp-skill/`。**调用前必须先 `cd` 进 skill 根。**
+> ⚠️ **关键约束 · 运行环境**：所有 `node scripts/cli.mjs ...` 命令**必须在本 SKILL.md 所在目录下运行**（cwd = 当前这份 SKILL.md 文件所在的目录）。AI 调用前先 `cd` 到 SKILL.md 所在路径，再执行 `node scripts/cli.mjs`。脚本依赖**相对路径**加载 `scripts/cli.mjs` / `config.json`，从其它目录调用会失败。
 
 > 🔑 **入参模式提示**：fund_data / stock_data 各**包含两类工具**：
 > - **行情类**（`*_price_indicators` / `*_kline` / `*_quote`）— **结构化代码参数**（`windcode + indexes/period/...`）
@@ -55,7 +55,7 @@ examples:
 
 ## 工作流程
 
-> 🚨 **再次强调**：以下所有命令在 **skill 根目录**下运行。`cd` 到 skill 安装路径后再执行 `node scripts/cli.mjs`。
+> 🚨 **再次强调**：以下所有命令在 **SKILL.md 所在目录**下运行。`cd` 到 SKILL.md 所在路径后再执行 `node scripts/cli.mjs`。
 
 ### Step 1: 看可用工具
 
@@ -150,7 +150,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 
 > 这些经验帮 AI 用得更准、少走弯路。
 
-1. **🚨 运行环境**：cli.mjs **必须在 skill 根目录下运行**（cwd = skill 安装路径）。装到 `~/.claude/skills/wind-mcp-skill/` 或 `~/.agents/skills/wind-mcp-skill/` 后，调用前**必须先 `cd` 进 skill 根**。从其它目录调用会因相对路径错误导致 `config.json` / cache 加载失败。
+1. **🚨 运行环境**：cli.mjs **必须在 SKILL.md 所在目录下运行**。AI 不需要硬记任何全局路径——这份 SKILL.md 加载到哪里，cwd 就 `cd` 到哪里。然后用相对路径 `node scripts/cli.mjs ...`。从其它目录调用会因相对路径错误导致 `scripts/cli.mjs` 找不到。
 2. **fund_data / stock_data 入参分两组**：
    - **行情类工具**（名字含 `price_indicators` / `kline` / `quote`）→ 结构化代码参数 `{windcode, indexes/period/...}`
    - **NL 类工具**（财务 / 档案 / 持仓 / 事件等）→ 自然语言 `{question}`
@@ -215,11 +215,11 @@ node scripts/cli.mjs call analytics_data get_financial_data '{"question":"中证
 | 行情类工具入参报错 | 行情工具用结构化参数 `{windcode, indexes}`，不要传 `{question}` |
 | NL 类工具入参报错 | NL 工具用 `{question}`，不要传 `{windcode}` |
 | 工具名报"未知 server_type" 或 "工具不存在" | 先 `list-tools <server_type>` 拿真 schema，按工具表选名 |
-| 调用失败但 cwd 不对 | 检查 `pwd` 是否为 skill 根目录；必须 `cd` 进 skill 安装路径再跑 |
+| 调用失败但 cwd 不对 | 检查 `pwd` 是否为 SKILL.md 所在目录；必须 `cd` 到 SKILL.md 所在路径再跑 |
 
 ## 自检（响应前）
 
-- 🚨 **运行 cwd 是 skill 根目录吗？** → 否则一切失败。先 `cd` 进 skill 安装路径。
+- 🚨 **运行 cwd 是 SKILL.md 所在目录吗？** → 否则一切失败。先 `cd` 到本 SKILL.md 所在路径。
 - 用户问题是 A 股 / 港股 / 中国宏观 / 中概？是 → 用本 skill；否 → 不要套
 - **选对 server_type**（最常出错处）：
   - 股票行情 / K 线 / 分钟 / 档案 / 财务 / 股本 / 事件 / 技术 / 风险 → `stock_data`

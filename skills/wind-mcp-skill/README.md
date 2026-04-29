@@ -37,7 +37,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 node scripts/cli.mjs open-portal
 ```
 
-> ⚠️ 所有命令必须在 skill 根目录下运行（`cd` 进 skill 安装路径后再执行）。
+> ⚠️ 所有命令必须在**本 SKILL.md 所在目录**下运行（`cd` 到 SKILL.md 所在路径后再执行）。
 
 ---
 
@@ -57,7 +57,7 @@ node scripts/cli.mjs open-portal
 ## API Key 三级兜底
 
 1. `export WIND_API_KEY=ak_xxx`
-2. `echo '{"wind_api_key":"ak_xxx"}' > config.json`（skill 目录下）
+2. `echo '{"wind_api_key":"ak_xxx"}' > config.json`（SKILL.md 同目录）
 3. `mkdir -p ~/.wind-aimarket && echo "WIND_API_KEY=ak_xxx" > ~/.wind-aimarket/config`（全局，所有 wind skill 共享）
 
 推荐方式 3。

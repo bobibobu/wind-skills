@@ -67,7 +67,7 @@ npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill <name> -g
 ```
 
 参数说明:
-- `-g`:装到 `~/.agents/skills/`(全局,跨项目共享)
+- `-g`:装到用户级全局 skill 位置(跨项目共享。具体路径由 npx skills 决定)
 - `-y`:**必加**,跳过交互菜单(不加会卡)
 
 ---
