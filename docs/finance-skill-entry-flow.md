@@ -18,7 +18,7 @@
                         v
 ┌──────────────────────────────────────────────┐
 │ 2. 安装 wind-find-finance-skill              │
-│ npx skills add JsonCodeChina/wind-skills ... │
+│ npx skills add Wind-Information-Co-Ltd/wind-skills ... │
 └───────────────────────┬──────────────────────┘
                         │
                         v

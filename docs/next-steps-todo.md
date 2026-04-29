@@ -42,7 +42,7 @@ https://aimarket.wind.com.cn/skills/manifest.json
   "vendor": "wind",
   "markets": ["A股", "港股"],
   "capabilities": ["latest_quote", "kline", "minute_bar", "sector_members"],
-  "install": "npx skills add JsonCodeChina/wind-skills --skill wind-quote-skill -g -y",
+  "install": "npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-quote-skill -g -y",
   "docs_url": "https://aimarket.wind.com.cn/skills/wiki/skills/wind-quote-skill.md"
 }
 ```

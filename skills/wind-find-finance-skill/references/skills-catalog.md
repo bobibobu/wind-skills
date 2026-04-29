@@ -61,9 +61,9 @@ description: AIMarket 平台 skill 清单本地副本。由 npx skills update -g
 ```bash
 # 全局安装(推荐 — 跨项目 + 跨 AI agent 共享)
 # 国外(GitHub)
-npx skills add JsonCodeChina/wind-skills --skill <name> -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill <name> -g -y
 # 国内(Gitee 镜像)
-npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill <name> -g -y
+npx skills add https://gitee.com/wind_info/wind-skills.git --skill <name> -g -y
 ```
 
 > 想限制在当前项目内用,把上面命令的 `-g` 去掉即可。

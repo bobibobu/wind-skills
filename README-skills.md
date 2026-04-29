@@ -28,13 +28,13 @@ description: 全网金融能力一站式入口。装一次,AI 自动按问题推
 国外(GitHub):
 
 ```bash
-npx skills add JsonCodeChina/wind-skills --skill wind-find-finance-skill -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-find-finance-skill -g -y
 ```
 
 国内(Gitee 镜像):
 
 ```bash
-npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-find-finance-skill -g -y
+npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-find-finance-skill -g -y
 ```
 
 > 想限制在当前项目内,去掉 `-g` 即可。
@@ -56,13 +56,13 @@ npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-find
 国外(GitHub):
 
 ```bash
-npx skills add JsonCodeChina/wind-skills --skill wind-mcp-skill -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-mcp-skill -g -y
 ```
 
 国内(Gitee 镜像):
 
 ```bash
-npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-mcp-skill -g -y
+npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-mcp-skill -g -y
 ```
 
 > 想限制在当前项目内,去掉 `-g` 即可。
@@ -92,4 +92,4 @@ npx skills update -g -y
 
 ---
 
-© AIMarket 2026 · 反馈与贡献:[github.com/JsonCodeChina/wind-skills](https://github.com/JsonCodeChina/wind-skills)
+© AIMarket 2026 · 反馈与贡献:[github.com/Wind-Information-Co-Ltd/wind-skills](https://github.com/Wind-Information-Co-Ltd/wind-skills)

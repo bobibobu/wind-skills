@@ -2,7 +2,7 @@
 
 > **Wind 万得金融 Skill 集合（monorepo）** · 通过 MCP 协议把万得金融数据接入 Claude / OpenClaw / Hermes 等 AI Agent，并一站式收录 wind 自家数据 + 社区分析工作流共 12 个金融 skill
 
-[![GitHub](https://img.shields.io/badge/GitHub-JsonCodeChina%2Fwind--skills-blue?logo=github)](https://github.com/JsonCodeChina/wind-skills)
+[![GitHub](https://img.shields.io/badge/GitHub-Wind--Information--Co--Ltd%2Fwind--skills-blue?logo=github)](https://github.com/Wind-Information-Co-Ltd/wind-skills)
 
 ---
 
@@ -50,10 +50,10 @@
 
 ```bash
 # GitHub
-npx skills add JsonCodeChina/wind-skills --skill wind-find-finance-skill -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-find-finance-skill -g -y
 
 # Gitee 镜像（国内）
-npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-find-finance-skill -g -y
+npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-find-finance-skill -g -y
 ```
 
 > 想限制在当前项目内，去掉 `-g` 即可。
@@ -69,7 +69,7 @@ https://aimarket.wind.com.cn/
 ### 装单个 skill
 
 ```bash
-npx skills add JsonCodeChina/wind-skills --skill <skill-name> -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill <skill-name> -g -y
 ```
 
 把 `<skill-name>` 换成上方表格里的任意 Skill 名称即可。
@@ -77,7 +77,7 @@ npx skills add JsonCodeChina/wind-skills --skill <skill-name> -g -y
 ### 列出仓库内所有可装 skill
 
 ```bash
-npx skills add JsonCodeChina/wind-skills --list
+npx skills add Wind-Information-Co-Ltd/wind-skills --list
 ```
 
 > `-y` 跳过交互菜单（必加）。`-g` 含义见上方"关于安装位置"段。

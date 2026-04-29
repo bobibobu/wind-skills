@@ -12,10 +12,10 @@
 
 ```bash
 # GitHub
-npx skills add JsonCodeChina/wind-skills --skill wind-mcp-skill -g -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-mcp-skill -g -y
 
 # Gitee 镜像（国内）
-npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-mcp-skill -g -y
+npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-mcp-skill -g -y
 ```
 
 > ⚠️ `-g` 会自动 symlink 到机器上**所有已识别的 AI agent**（Claude Code / Cursor / OpenClaw / Hermes 等）。如果你不想这样，看方式 B。
@@ -24,10 +24,10 @@ npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-mcp-
 
 ```bash
 # GitHub
-npx skills add JsonCodeChina/wind-skills --skill wind-mcp-skill -y
+npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-mcp-skill -y
 
 # Gitee 镜像（国内）
-npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill wind-mcp-skill -y
+npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-mcp-skill -y
 ```
 
 > 装到当前目录下，仅当前项目内的 AI agent 能识别。

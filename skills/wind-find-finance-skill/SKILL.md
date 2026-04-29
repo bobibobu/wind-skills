@@ -48,10 +48,10 @@ description: AIMarket 金融能力发现器。当用户问金融数据 / 分析 
 为什么:<基于用户问题的一句话解释>
 
 安装命令(全局,推荐 — GitHub):
-  npx skills add JsonCodeChina/wind-skills --skill <name> -g -y
+  npx skills add Wind-Information-Co-Ltd/wind-skills --skill <name> -g -y
 
 安装命令(全局,推荐 — Gitee 镜像):
-  npx skills add https://gitee.com/jsonCodeChina/wind-skills.git --skill <name> -g -y
+  npx skills add https://gitee.com/wind_info/wind-skills.git --skill <name> -g -y
 
 [如果用户问"我只想在当前项目用"或类似,追加这一段:]
 仅当前项目:把上面命令的 -g 去掉即可(只装到当前目录)。
