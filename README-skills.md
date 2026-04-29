@@ -41,15 +41,15 @@ npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-find-fin
 
 装好后任意 AI 对话提金融问题(行情 / 基金 / 估值 / 选股 / 复盘 / 回测 / 公告 / 宏观 ...),AI 会:
 
-- 列出 1-3 个相关 skill 并给出安装命令让你挑装
-- 推荐先装 **wind-mcp-skill** 作数据来源
+- 从平台当前 12+ 能力(估值 / 复盘 / 选股 / 回测 / 个股研究 / 主线识别等工作流 + Wind 数据底座)里挑 1-5 个推荐你装
+- 取数类问题永远附 **wind-mcp-skill** 作数据底座
 
 ---
 
 ## 路径 B:直接装 Wind 万得数据 skill
 
 > 适合:已知要用 Wind 数据 / 重度查询用户。
-> 覆盖股票(行情与财务) · 基金(行情与全维数据) · 公司公告 · 财经新闻 · 宏观经济指标。
+> 覆盖股票(行情 / 财务) · 基金(行情 / 档案 / 持仓 / 业绩) · 公司公告 · 财经新闻 · 宏观指标。
 
 ### Step 1 — 装 skill 包
 
@@ -74,7 +74,7 @@ npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-mcp-skil
 1. 调 wind-mcp-skill 触发"未配置 Key"引导
 2. 询问你是否同意打开浏览器
 3. 同意后自动弹 `aimarket.wind.com.cn` 开发者中心(未登录跳登录页)
-4. 你拿到 Key 后,AI 会按提示给你完整配置命令(推荐全局 `~/.wind-aimarket/config`,所有 wind skill 共享)
+4. 你拿到 Key 后,AI 会按提示给你完整配置命令(推荐全局 `~/.wind-aimarket/config`,配一次后续不用重复)
 
 > 你也可以提前手动配置:
 > ```bash
