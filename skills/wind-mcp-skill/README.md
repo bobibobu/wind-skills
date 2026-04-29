@@ -37,7 +37,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 node scripts/cli.mjs open-portal
 ```
 
-> ⚠️ 所有命令必须在**本 SKILL.md 所在目录**下运行（`cd` 到 SKILL.md 所在路径后再执行）。
+> ⚠️ 所有命令在**本文件（SKILL.md）所在目录下执行**。
 
 ---
 
