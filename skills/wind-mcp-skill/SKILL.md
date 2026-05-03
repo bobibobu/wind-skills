@@ -30,10 +30,11 @@ examples:
 
 访问万得 Wind 金融数据：股票（行情与财务基本面）、基金（行情与全维数据）、上市公司公告与新闻、宏观经济指标。
 
-> ⚠️ **3 条核心规则**（违反必失败）：
+> ⚠️ **4 条核心规则**（违反必失败）：
 > 1. 命令必须在**本文件所在目录**下执行
 > 2. fund_data / stock_data 分**行情类**（`*_price_indicators` / `*_kline` / `*_quote` → 结构化 `{windcode, ...}`）和 **NL 类**（财务 / 档案 / 持仓 / 事件等 → `{question}` 自然语言）—— 选错入参必报错
 > 3. K 线必须显式传 `begin_date`（默认昨天，否则只回 2 条）；quote 字段名是 `begin / end` 短名（跟 K 线不一样）
+> 4. 调 `get_*_price_indicators` 时,**用户问的字段不在工具表"常用快捷"里就必须 Read `references/indicators.md`** 挑准确字段名(694 项 enum,后端有命名陷阱:大小写混杂 / 个别拼写错原样保留 / `Type` `Shares` 等单词字段含义特殊)—— 凭印象猜必错
 
 > 📅 **数据时效**：行情快照 + 分钟级 = 当日准实时；K 线 = 收盘历史；财务 / 档案 = 最近一期定期报告。**WIND_API_KEY 有日调用额度**，密集开发请多 Key 轮换。
 
@@ -100,15 +101,15 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | 字段 | 必填 | 类型 | 默认 | 说明 |
 |---|---|---|---|---|
 | `windcode` | ✅ | string | | 见 windcode 约定 |
-| `indexes` | ✅ | string (enum) | | 行情字段，逗号分隔。常用：`NAME,MATCH,PRECLOSE,OPEN,HIGH,LOW,VOLUME,TURNOVER,CHANGE,CHANGERANGE,IOPV,PREMIUMDISCOUNTRATE,FUNDSIZE`。694 项全集见 `list-tools` |
+| `indexes` | ✅ | string (enum) | | 行情字段，逗号分隔。**常用快捷**(覆盖 80% 高频问题)：`NAME,MATCH,PRECLOSE,OPEN,HIGH,LOW,VOLUME,TURNOVER,CHANGE,CHANGERANGE,IOPV,PREMIUMDISCOUNTRATE,FUNDSIZE`。要其它字段先 Read `references/indicators.md`(694 项,有命名陷阱) |
 
 #### `get_fund_kline` — 场内基金 K 线
 
 | 字段 | 必填 | 类型 | 默认 | 说明 |
 |---|---|---|---|---|
 | `windcode` | ✅ | string | | |
-| `begin_date` | ✅ | string | 昨天 | `yyyyMMdd`。schema 标必填；缺省服务端回落昨天，**但只回 2 条** |
-| `end_date` | ✅ | string | 今天 | `yyyyMMdd`。schema 标必填；缺省回落今天 |
+| `begin_date` | ⚠️ 建议必填 | string | 昨天 | `yyyyMMdd`，**不显式传只回 2 条** |
+| `end_date` | | string | 今天 | `yyyyMMdd` |
 | `period` | | string | `"10"` | `1`=1分 / `3`=5分 / `4`=10分 / `5`=15分 / `6`=30分 / `7`=60分 / `8`=120分 / `9`=240分 / `10`=日K / `11`=周K / `12`=月K / `13`=年K / `14`=季K / `15`=半年K |
 | `aftype` | | string | `"0"` | `0`=前复权 / `1`=后复权（**只这两值**） |
 | `issusp` | | string | `"1"` | `0`=不含停牌 / `1`=含 |
@@ -122,7 +123,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | `begin` | | string | `LAST` | ⚠️ **字段名 `begin` 不是 `begin_date`**！`yyyyMMdd` 或 `LAST` |
 | `end` | | string | `LAST` | ⚠️ **字段名 `end` 不是 `end_date`** |
 
-**NL 类（入参 `{question, lang?, version?}`；`lang`：`CNS`=中文（默认）/ `ENS`=英文，传错回落中文；`version`：预留字段，无校验，通常不传）：**
+**NL 类（入参 `{question, lang?, version?}`）：**
 
 | 工具 | 说明 | question 示例 |
 |---|---|---|
@@ -144,7 +145,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | 字段 | 必填 | 类型 | 默认 | 说明 |
 |---|---|---|---|---|
 | `windcode` | ✅ | string | | A 股 / 港股均支持 |
-| `indexes` | ✅ | string (enum) | | 行情字段，逗号分隔。常用：`NAME,MATCH,PRECLOSE,OPEN,HIGH,LOW,VOLUME,TURNOVER,CHANGE,CHANGERANGE,CHANGEHANDRATE,LIANGBI,WEIBI,HIGHLIMIT,LOWLIMIT,CAPITALMARKETVALUE,LISTEDMARKETVALUE,WEEK52HIGH,WEEK52LOW,PE_TTM,PB,MACD,KDJ_K,RSI6`。全集见 `list-tools` |
+| `indexes` | ✅ | string (enum) | | 行情字段，逗号分隔。**常用快捷**(覆盖 80% 高频问题)：`NAME,MATCH,PRECLOSE,OPEN,HIGH,LOW,VOLUME,TURNOVER,CHANGE,CHANGERANGE,CHANGEHANDRATE,LIANGBI,WEIBI,HIGHLIMIT,LOWLIMIT,CAPITALMARKETVALUE,LISTEDMARKETVALUE,WEEK52HIGH,WEEK52LOW,PE_TTM,PB,DIVIDENDYIELDRATIO`。要其它字段(估值细分/财务/资金流/期权希腊字母/债券估值/历史多周期等)先 Read `references/indicators.md`(694 项,有命名陷阱) |
 
 #### `get_stock_kline` — 股票 K 线
 
@@ -154,7 +155,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 
 字段同 `get_fund_quote`（参见上方），字段名 `begin / end` 不是 `begin_date / end_date`。
 
-**NL 类（入参 `{question, lang?, version?}`；`lang`：`CNS`=中文（默认）/ `ENS`=英文，传错回落中文；`version`：预留字段，无校验，通常不传）：**
+**NL 类（入参 `{question, lang?, version?}`）：**
 
 | 工具 | 说明 | question 示例 |
 |---|---|---|
@@ -172,7 +173,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | 字段 | 必填 | 类型 | 说明 |
 |---|---|---|---|
 | `query` | ✅ | string | 自然语言，如 `"贵州茅台 2024 年报"` |
-| `top_k` | | integer | 返回文档数。范围 `1-20`，默认 `5` |
+| `top_k` | | integer | 返回文档数 |
 | `start_date` / `end_date` | | string | ⚠️ 格式 `YYYY-MM-DD`（跟 K 线 `yyyyMMdd` **不一样**）|
 
 #### `get_financial_news` — 财经新闻
@@ -189,7 +190,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | `beginDate` / `endDate` | | string | `yyyyMMdd` |
 | `freq` | | enum | `日`=`1` / `工作日`=`2` / `周`=`3` / `月`=`4` / `季`=`5` / `半年`=`6` / `年`=`7` / `年度`=`8`（接受中文或代码）|
 | `magnitude` | | enum | `个`=`1` / `千` / `万` / `百万` / `千万` / `亿` / `十亿` / `百亿` / `千亿` / `万亿`（中文或对应数字）|
-| `currency` | | enum | ISO 码 `USD` / `CNY` / `EUR` / `JPY` / `AUD` / `GBP` / `CHF` / `CAD` / `SGD` / `BYR` / `HKD` / `MYR`，也接受中文：美元 / 人民币 / 欧元 / 日元 / 澳大利亚元 / 英镑 / 瑞士法郎 / 加拿大元 / 新加坡元 / 白俄罗斯卢布 / 港元 / 马来西亚林吉特 |
+| `currency` | | enum | `USD` / `CNY` / `EUR` / `JPY` / `AUD` / `GBP` / `CHF` / `CAD` / `SGD` / `HKD` / `MYR` / `BYR` |
 | `searchType` | | enum | `深度`=`0` / `精确`=`1` |
 | `ifUnion` | | enum | `开启`=`1` / `不开启`=`2`（混合搜索）|
 
@@ -202,8 +203,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | 字段 | 必填 | 类型 | 说明 |
 |---|---|---|---|
 | `question` | ✅ | string | 覆盖 fund / stock 之外的杂项与跨域综合，如 `"中证 500 最近一周表现"` |
-| `lang` | | enum | `CNS`（中文，默认）/ `ENS`（英文）。传错不报错，自动回落中文 |
-| `version` | | string | 预留字段，无校验，通常不传 |
+| `lang` | | enum | `zh-CN` / `en` |
 
 ## 数据来源标注（必做）
 
@@ -258,6 +258,7 @@ node scripts/cli.mjs call analytics_data get_financial_data '{"question":"中证
 | `*_quote` 参数报错 | 字段名是 `begin / end`，不是 `begin_date / end_date` |
 | `aftype` 报错 | 只接受 `"0"` / `"1"`，无"不复权" |
 | 工具不存在 / 未知 server_type | 先 `list-tools <server_type>` 拿真 schema |
+| `indexes` 字段不识别 / 字段名不存在 | Read `references/indicators.md`，从 694 项里挑准确字段名（不要凭印象猜）|
 | 调用失败但似乎啥都没报 | 检查命令是否在本 SKILL.md 所在目录下执行 |
 
 ## 调用前自查
