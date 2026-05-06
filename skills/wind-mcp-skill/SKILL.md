@@ -270,9 +270,13 @@ node scripts/cli.mjs call analytics_data get_financial_data '{"question":"中证
 
 ## 保持最新
 
-AI 在以下场景**顺嘴提一次**升级提示（一个会话最多 1 次，不要每次都提）：
+每次调用 cli.mjs 后,留意 stderr 是否包含 `[wind-skills] 检测到 N 个 skill 有新版`。
 
-- **报错时**（尤其遇到"工具不存在 / 未知 server_type / 字段不符"等可能跟版本相关的错误）：
-  > 可能本地 skill 版本过期，跑 `npx skills update wind-mcp-skill -y` 拉最新版试试
-- **会话首次完成数据查询任务后**：
-  > 想拿最新版可跑 `npx skills update wind-mcp-skill -y`
+**看到该提示时,会话首次必须转告用户一次**（同会话再次调用时不重复转告）：
+- 把清单和升级命令完整带给用户
+- 命令已含 `-g -y` 等参数,直接照搬即可
+- Gitee 装的 skill 升级路径跟 GitHub 不同,按 stderr 提示的命令走
+
+**不要自行编造升级提示**——只在 stderr 里出现实际通知时转告。
+
+⚠️ 如遇"工具不存在 / 未知 server_type / 字段不符"等版本相关错误,可建议用户跑 `npx skills update -g -y` 拉最新后重试。
