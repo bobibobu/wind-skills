@@ -67,7 +67,7 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | 类型 | 入参 | 适用工具 |
 |---|---|---|
 | **行情类** | `{windcode, ...}` 结构化字段 | `*_price_indicators` / `*_kline` / `*_quote` |
-| **NL 类** | `{question: string, lang?: "CNS"\|"ENS"}` 自然语言（默认 `CNS`=中文） | 其余工具（含 `financial_docs` / `economic_data` / `analytics_data`，部分入参字段名有差异，详见工具表）|
+| **NL 类** | `{question, lang?}` 自然语言（`lang` enum 在不同 server_type 下取值不同，见各段说明） | 其余工具（含 `financial_docs` / `economic_data` / `analytics_data`，部分入参字段名 / 取值有差异，详见工具表）|
 
 ---
 
@@ -89,8 +89,9 @@ node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 | 字段 | 必填 | 默认 | 说明 |
 |---|---|---|---|
 | `windcode` | ✅ | | 标的（见行情类段头）|
-| `begin_date` | ⚠️ | 昨天 | `yyyyMMdd` |
+| `begin_date` | ⚠️ | 昨天 | `yyyyMMdd`。**必须显式传**，否则只回 2 条 |
 | `end_date` | | 今天 | `yyyyMMdd` |
+| `count` | | | 数据条数：正数=从 `begin_date` 往后取 N 条；负数=从 `end_date` 往前取 N 条。不传则取 `begin_date ~ end_date` 范围内所有交易日 |
 | `period` | | `"10"` | `1`=1分 / `3`=5分 / `4`=10分 / `5`=15分 / `6`=30分 / `7`=60分 / `8`=120分 / `9`=240分 / `10`=日K / `11`=周K / `12`=月K / `13`=年K / `14`=季K / `15`=半年K |
 | `aftype` | | `"0"` | `0`=前复权 / `1`=后复权 |
 | `issusp` | | `"1"` | `0`=不含停牌 / `1`=含 |
@@ -114,9 +115,11 @@ node scripts/cli.mjs call stock_data get_stock_quote '{"windcode":"600519.SH"}'
 
 ### NL 类（按 server_type 分）
 
-入参签名：`{question: string, lang?: "CNS" | "ENS"}`，默认 `CNS`=中文。
+入参签名：`{question: string, lang?}`。`lang` enum 按工具不同（schema 真值），见各段。
 
 #### `fund_data` NL（6 个）
+
+入参 `lang?: "English" | "中文"`，默认 `"中文"`。
 
 | 工具 | 说明 | question 示例 |
 |---|---|---|
@@ -128,6 +131,8 @@ node scripts/cli.mjs call stock_data get_stock_quote '{"windcode":"600519.SH"}'
 | `get_fund_company_info` | 基金管理公司档案 + 经理团队 | `"易方达基金管理公司档案"` |
 
 #### `stock_data` NL（6 个）
+
+入参 `lang?: "English" | "中文"`，默认 `"中文"`。
 
 | 工具 | 说明 | question 示例 |
 |---|---|---|
@@ -192,7 +197,8 @@ node scripts/cli.mjs call analytics_data get_financial_data '{"question":"中证
 | 命令必须在**本文件所在目录**下执行 | cli.mjs 用相对路径，否则找不到资源 |
 | K 线 `begin_date` 必须**显式传**（哪怕传昨天）| 不传只回 2 条数据 |
 | `*_quote` 字段名是 `begin / end`，**不是** `begin_date / end_date` | 字段名错参数解析报错 |
-| K 线日期 `yyyyMMdd`，文档查询 / EDB 字段 `start_date` / `end_date` 用 `YYYY-MM-DD` | 格式混了报错 |
+| K 线 `begin_date / end_date` 和 EDB `beginDate / endDate`（注意 camelCase）都用 `yyyyMMdd` | 格式不对报错 |
+| 文档查询 `start_date / end_date` 用 `YYYY-MM-DD`（**只有 financial_docs 是这格式**）| 跟 K 线 / EDB 混了报错 |
 | `aftype` 只接受 `"0"` / `"1"`（无"不复权"） | 其他值报错 |
 | 单工具调用**只支持单标的** | 逗号分隔多代码后端只识别第 1 个，其余静默忽略 |
 | 结果末尾**必须标注**「数据来源于万得 Wind 金融数据服务」 | 合规要求 |
