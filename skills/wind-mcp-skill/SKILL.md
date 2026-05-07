@@ -30,13 +30,11 @@ examples:
 
 通过 MCP 协议访问万得 Wind 金融数据：股票 / 基金 / 公司公告 / 财经新闻 / 宏观指标。
 
-> ⚠️ **核心规则**（违反必失败）：
-> 1. 命令必须在**本文件所在目录**下执行（cli.mjs 用相对路径）
-> 2. 入参分两类：**行情类**（`*_price_indicators` / `*_kline` / `*_quote`）用 `{windcode, ...}` 结构化；**NL 类**用 `{question, lang?}` 自然语言
+---
 
-> 📅 **数据时效**：行情快照 + 分钟级 = 当日准实时；K 线 = 收盘历史；财务 / 档案 = 最近一期定期报告。`WIND_API_KEY` 有日调用额度。
+## 1. 数据范围
 
-## server_type 概览
+5 个 server_type 各自能干什么：
 
 | server_type | 能力 |
 |---|---|
@@ -48,9 +46,32 @@ examples:
 
 **❌ 不触发**：美股 / 欧股 / 非中概股；汇率 / 期货盘口 / 加密货币；非金融数据。
 
-## windcode 格式
+**📅 数据时效**：行情快照 + 分钟级 = 当日准实时；K 线 = 收盘历史；财务 / 档案 = 最近一期定期报告。`WIND_API_KEY` 有日调用额度。
 
-行情类工具的 `windcode` **接受 Wind 代码或中文名**（后端自动解析）：
+---
+
+## 2. 使用方法
+
+### 调用命令
+
+```bash
+node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
+```
+
+### API Key
+
+报 `KEY_MISSING` 时按 cli.mjs stderr 给的 extraHint 配置即可（程序自动按多种方式查找 Key）；需要拿 Key 跑 `node scripts/cli.mjs open-portal` 自动打开开发者中心。
+
+### 入参签名两类
+
+| 类型 | 入参 | 适用工具 |
+|---|---|---|
+| **行情类** | `{windcode, ...}` 结构化字段 | `*_price_indicators` / `*_kline` / `*_quote` |
+| **NL 类** | `{question: string, lang?: "CNS"\|"ENS"}` 自然语言（默认 `CNS`=中文） | 其余工具（含 `financial_docs` / `economic_data` / `analytics_data`，部分入参字段名有差异，详见工具表）|
+
+### windcode 填法（仅行情类用）
+
+`windcode` **接受 Wind 代码或中文名**（后端自动解析）：
 
 | 类型 | Wind 代码 | 中文名 |
 |---|---|---|
@@ -59,72 +80,52 @@ examples:
 | 场外基金 | `005827.OF` | `易方达蓝筹精选` |
 | ETF / LOF | `588200.SH` / `159915.SZ` | `科创50ETF` |
 
-> 重名标的或精确查询用 Wind 代码；中文名简洁但有歧义风险。
-
-⚠️ **单工具调用只支持单标的**——传逗号分隔的多代码后端只识别第 1 个。多标的对比请并行多次调用。
-
-## 调用
-
-```bash
-node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
-```
-
-报 `KEY_MISSING` 时按 cli.mjs stderr 给的 extraHint 配置即可（程序自己按 env / skill / 全局三级查找）；需要拿 Key 跑 `node scripts/cli.mjs open-portal` 自动打开开发者中心。
-
 ---
 
-## 行情类工具（`fund_data` + `stock_data` 共用）
+## 3. 工具表
 
-入参签名：`{windcode, ...}` 结构化。`windcode` 范围跟 server_type 走（fund_data 限基金标的，stock_data 限 A/H 股）。
+### 行情类（`fund_data` + `stock_data` 共用 3 个工具）
 
-### `get_{fund|stock}_price_indicators` — 行情快照
+#### `get_{fund|stock}_price_indicators` — 行情快照
 
 | 字段 | 必填 | 说明 |
 |---|---|---|
-| `windcode` | ✅ | 见 windcode 格式 |
-| `indexes` | ✅ | 字段逗号分隔。**常用快捷**（覆盖 80% 高频问题）：<br>· 通用：`NAME,MATCH,PRECLOSE,OPEN,HIGH,LOW,VOLUME,TURNOVER,CHANGE,CHANGERANGE`<br>· 股票额外：`CHANGEHANDRATE,LIANGBI,WEIBI,HIGHLIMIT,LOWLIMIT,CAPITALMARKETVALUE,LISTEDMARKETVALUE,WEEK52HIGH,WEEK52LOW,PE_TTM,PB,DIVIDENDYIELDRATIO`<br>· 基金额外：`IOPV,PREMIUMDISCOUNTRATE,FUNDSIZE`<br>⚠️ 要其它字段（估值细分 / 财务 / 资金流 / 期权希腊字母等）**先 Read `references/indicators.md`**（694 项 enum，命名陷阱：大小写混杂 / 拼写错原样保留 / `Type` `Shares` 等单词字段含义特殊）——凭印象猜必错 |
+| `windcode` | ✅ | 见 windcode 填法 |
+| `indexes` | ✅ | 字段逗号分隔。**常用快捷**（覆盖 80% 高频问题）：<br>· 通用：`NAME,MATCH,PRECLOSE,OPEN,HIGH,LOW,VOLUME,TURNOVER,CHANGE,CHANGERANGE`<br>· 股票额外：`CHANGEHANDRATE,LIANGBI,WEIBI,HIGHLIMIT,LOWLIMIT,CAPITALMARKETVALUE,LISTEDMARKETVALUE,WEEK52HIGH,WEEK52LOW,PE_TTM,PB,DIVIDENDYIELDRATIO`<br>· 基金额外：`IOPV,PREMIUMDISCOUNTRATE,FUNDSIZE`<br>其它字段（估值细分 / 财务 / 资金流 / 期权希腊字母等）见使用技巧 |
 
-### `get_{fund|stock}_kline` — K 线
+#### `get_{fund|stock}_kline` — K 线
 
 | 字段 | 必填 | 默认 | 说明 |
 |---|---|---|---|
 | `windcode` | ✅ | | |
-| `begin_date` | ⚠️ | 昨天 | `yyyyMMdd`。**必须显式传**，否则只回 2 条 |
+| `begin_date` | ⚠️ | 昨天 | `yyyyMMdd` |
 | `end_date` | | 今天 | `yyyyMMdd` |
 | `period` | | `"10"` | `1`=1分 / `3`=5分 / `4`=10分 / `5`=15分 / `6`=30分 / `7`=60分 / `8`=120分 / `9`=240分 / `10`=日K / `11`=周K / `12`=月K / `13`=年K / `14`=季K / `15`=半年K |
-| `aftype` | | `"0"` | `0`=前复权 / `1`=后复权（**只这两值**，无"不复权"）|
+| `aftype` | | `"0"` | `0`=前复权 / `1`=后复权 |
 | `issusp` | | `"1"` | `0`=不含停牌 / `1`=含 |
 
-### `get_{fund|stock}_quote` — 分钟级
+#### `get_{fund|stock}_quote` — 分钟级
 
 | 字段 | 必填 | 默认 | 说明 |
 |---|---|---|---|
 | `windcode` | ✅ | | |
-| `begin` | | `LAST` | ⚠️ **字段名 `begin` 不是 `begin_date`**！`yyyyMMdd` 或 `LAST` |
-| `end` | | `LAST` | ⚠️ **字段名 `end` 不是 `end_date`** |
+| `begin` | | `LAST` | `yyyyMMdd` 或 `LAST` |
+| `end` | | `LAST` | `yyyyMMdd` 或 `LAST` |
 
 **示例：**
 
 ```bash
-# 行情快照（A 股 / 港股 / 基金 ETF）
 node scripts/cli.mjs call stock_data get_stock_price_indicators '{"windcode":"600519.SH","indexes":"NAME,MATCH,CHANGERANGE,VOLUME"}'
-node scripts/cli.mjs call stock_data get_stock_price_indicators '{"windcode":"00700.HK","indexes":"NAME,MATCH,CHANGERANGE"}'
 node scripts/cli.mjs call fund_data get_fund_price_indicators '{"windcode":"588200.SH","indexes":"NAME,MATCH,IOPV,PREMIUMDISCOUNTRATE"}'
-
-# K 线（必传 begin_date）
 node scripts/cli.mjs call stock_data get_stock_kline '{"windcode":"600519.SH","begin_date":"20260401","end_date":"20260430"}'
-
-# 分钟级（字段名 begin/end）
 node scripts/cli.mjs call stock_data get_stock_quote '{"windcode":"600519.SH"}'
 ```
 
----
+### NL 类（按 server_type 分）
 
-## NL 类工具
+入参签名：`{question: string, lang?: "CNS" | "ENS"}`，默认 `CNS`=中文。
 
-入参签名：`{question: string, lang?: "CNS" | "ENS"}`，默认 `CNS`=中文 / `ENS`=英文。`question` 用关键实体即可（✅ `"005827.OF 基金档案"` / ❌ `"帮我查一下..."`）。
-
-### `fund_data` NL（6 个）
+#### `fund_data` NL（6 个）
 
 | 工具 | 说明 | question 示例 |
 |---|---|---|
@@ -135,7 +136,7 @@ node scripts/cli.mjs call stock_data get_stock_quote '{"windcode":"600519.SH"}'
 | `get_fund_shareholders` | 持有人结构（个人 / 机构 / 申购赎回 / 规模变动）| `"005827.OF 持有人结构"` |
 | `get_fund_company_info` | 基金管理公司档案 + 经理团队 | `"易方达基金管理公司档案"` |
 
-### `stock_data` NL（6 个）
+#### `stock_data` NL（6 个）
 
 | 工具 | 说明 | question 示例 |
 |---|---|---|
@@ -146,9 +147,7 @@ node scripts/cli.mjs call stock_data get_stock_quote '{"windcode":"600519.SH"}'
 | `get_stock_technicals` | 技术指标时间序列（MACD / KDJ / RSI / BOLL / 融资融券 / 龙虎榜）| `"贵州茅台近 60 日 MACD 走势"` |
 | `get_risk_metrics` | 风险指标（Beta / Jensen Alpha / 波动率 / Sharpe）| `"贵州茅台过去 1 年 Beta 和波动率"` |
 
-> 💡 **`price_indicators` vs `technicals` 鉴别**：单时点最新值 → `price_indicators`；过去 N 日时间序列 → `technicals`（NL）。
-
-### `financial_docs` — 公告 / 新闻（2 个）
+#### `financial_docs` — 公告 / 新闻（2 个）
 
 `get_company_announcements`（公司公告 / 监管文件 / 招股书 / 业绩公告 / 致股东信）/ `get_financial_news`（财经新闻）共用入参：
 
@@ -156,13 +155,13 @@ node scripts/cli.mjs call stock_data get_stock_quote '{"windcode":"600519.SH"}'
 |---|---|---|---|
 | `query` | ✅ | string | 自然语言，如 `"贵州茅台 2024 年报"` / `"美联储利率政策"` |
 | `top_k` | | int | 返回文档数 |
-| `start_date` / `end_date` | | string | ⚠️ 格式 `YYYY-MM-DD`（跟 K 线 `yyyyMMdd` **不同**）|
+| `start_date` / `end_date` | | string | 格式 `YYYY-MM-DD` |
 
 ```bash
 node scripts/cli.mjs call financial_docs get_financial_news '{"query":"美联储利率政策","top_k":5,"start_date":"2026-01-01"}'
 ```
 
-### `economic_data` — EDB 宏观（1 个）
+#### `economic_data` — EDB 宏观（1 个）
 
 `get_economic_data` — EDB 宏观 / 行业经济指标，提供 `freq` / `magnitude` / `currency` 等精细化字段控制：
 
@@ -180,7 +179,7 @@ node scripts/cli.mjs call financial_docs get_financial_news '{"query":"美联储
 node scripts/cli.mjs call economic_data get_economic_data '{"metricIdsStr":"中国 CPI 同比","freq":"月","beginDate":"20240101","endDate":"20261231"}'
 ```
 
-### `analytics_data` — NL 通用入口（1 个）
+#### `analytics_data` — NL 通用入口（1 个）
 
 `get_financial_data` — 自然语言通用查询入口，覆盖整个 Wind 数据库（含跨域综合 / 指数 / 衍生品 / 债券 / 商品等其它 server_type 之外的杂项）。
 
@@ -195,21 +194,47 @@ node scripts/cli.mjs call analytics_data get_financial_data '{"question":"中证
 
 ---
 
-## 数据来源标注（必做）
+## 4. 注意事项（违反必失败）
 
-向用户呈现查询结果时，**必须在结果末尾标注**：`数据来源于万得 Wind 金融数据服务`。
+| 规则 | 后果 |
+|---|---|
+| 命令必须在**本文件所在目录**下执行 | cli.mjs 用相对路径，否则找不到资源 |
+| K 线 `begin_date` 必须**显式传**（哪怕传昨天）| 不传只回 2 条数据 |
+| `*_quote` 字段名是 `begin / end`，**不是** `begin_date / end_date` | 字段名错参数解析报错 |
+| K 线日期 `yyyyMMdd`，文档查询 / EDB 字段 `start_date` / `end_date` 用 `YYYY-MM-DD` | 格式混了报错 |
+| `aftype` 只接受 `"0"` / `"1"`（无"不复权"） | 其他值报错 |
+| 单工具调用**只支持单标的** | 逗号分隔多代码后端只识别第 1 个，其余静默忽略 |
+| 结果末尾**必须标注**「数据来源于万得 Wind 金融数据服务」 | 合规要求 |
 
-## 错误恢复
+---
+
+## 5. 使用技巧
+
+| 场景 | 怎么做 |
+|---|---|
+| 拿单时点最新值 / 已知具体字段名 | 用行情类工具（`*_price_indicators`），结构化入参 |
+| 拿过去 N 日时间序列 | K 线 / 分钟级用行情类（`*_kline` / `*_quote`）；技术指标 / 财务时间序列用 NL 类（`*_technicals` 等）|
+| 财务 / 档案 / 持仓 / 事件等深度业务问题 | NL 类工具，自然语言入参 |
+| `windcode` 重名 / 精确查询 | 用 Wind 代码（`600519.SH`），不用中文名（中文名简洁但有歧义）|
+| `indexes` 字段不在常用快捷里 | Read `references/indicators.md`（694 项 enum，命名陷阱多：大小写混杂 / 拼写错原样保留 / `Type` `Shares` 等单词字段含义特殊，凭印象猜必错）|
+| 多标的对比（`贵州茅台 vs 五粮液`）| 单工具单标的限制 → 并行多次调用 |
+| NL `question` / `query` 写法 | 提取关键实体即可。✅ `"005827.OF 基金档案"` / ❌ `"帮我查一下..."` |
+
+---
+
+## 6. 出错怎么办
 
 cli.mjs 大部分错误会自动输出错误码 + 处理建议（stderr），照建议走即可。常见 schema 类陷阱：
 
 | 错误 | 解法 |
 |---|---|
-| `indexes` 字段不识别 / 字段名不存在 | Read `references/indicators.md` 挑准确字段名（不要凭印象猜）|
+| `indexes` 字段不识别 / 字段名不存在 | Read `references/indicators.md` 挑准确字段名 |
 | 工具不存在 / 未知 server_type / schema 对不上 | 跑 `npx skills update wind-mcp-skill -y` 拉新版 |
 | 调用似乎啥都没报 | 检查命令是否在本 SKILL.md 所在目录下执行 |
 
-## 保持最新
+---
+
+## 7. 保持最新
 
 每次调用 cli.mjs 后，留意 stderr 是否包含 `[wind-skills] 检测到 N 个 skill 有新版`。
 
