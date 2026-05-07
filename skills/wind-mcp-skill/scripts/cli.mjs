@@ -417,7 +417,7 @@ const USAGE =
   `典型:\n` +
   `  cli.mjs call stock_data get_stock_basicinfo '{"question":"600519.SH 公司基本档案"}'   # NL 类\n` +
   `  cli.mjs call stock_data get_stock_price_indicators '{"windcode":"600519.SH","indexes":"NAME,MATCH,CHANGERANGE"}'   # 行情类(结构化)\n` +
-  `  cli.mjs call fund_data get_fund_kline '{"windcode":"588200.SH","period":"10","count":30}'   # 基金 K 线\n` +
+  `  cli.mjs call fund_data get_fund_kline '{"windcode":"588200.SH","begin_date":"20260401","end_date":"20260430"}'   # 基金 K 线(必传 begin_date)\n` +
   `  cli.mjs call analytics_data get_financial_data '{"question":"贵州茅台 2024 年 ROE"}'`;
 
 const commands = {
