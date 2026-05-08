@@ -145,7 +145,7 @@ function getServer(server_type) {
   return server;
 }
 
-// ───── 认证（三级兜底：env > skill config > 全局 config）─────
+// ───── 认证 ─────
 
 function getApiKey() {
   if (process.env.WIND_API_KEY) return process.env.WIND_API_KEY;
@@ -166,15 +166,13 @@ function getApiKey() {
     } catch {}
   }
 
-  die('KEY_MISSING', 'WIND_API_KEY 未配置（env / skill config / 全局 config 三级兜底全失败）', {
+  die('KEY_MISSING', 'WIND_API_KEY 未配置', {
     extraHint:
-      `获取 Key（推荐先问用户是否同意打开浏览器）：\n` +
+      `获取 Key（建议先问用户是否同意打开浏览器）：\n` +
       `  $ node ${join(SKILL_DIR, 'scripts', 'cli.mjs')} open-portal\n` +
       `  或手动访问：${PORTAL_URL}（未登录会自动跳到 /#/login）\n\n` +
-      `配置 Key（任选其一）：\n` +
-      `  A. export WIND_API_KEY=ak_xxx\n` +
-      `  B. echo '{"wind_api_key":"ak_xxx"}' > ${join(SKILL_DIR, 'config.json')}\n` +
-      `  C. mkdir -p ~/.wind-aimarket && echo "WIND_API_KEY=ak_xxx" > ~/.wind-aimarket/config  (推荐：所有 wind skill 共享)`,
+      `配置 Key：\n` +
+      `  mkdir -p ~/.wind-aimarket && echo "WIND_API_KEY=ak_xxx" > ~/.wind-aimarket/config`,
   });
 }
 
