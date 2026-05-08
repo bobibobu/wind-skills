@@ -168,11 +168,16 @@ function getApiKey() {
 
   die('KEY_MISSING', 'WIND_API_KEY 未配置', {
     extraHint:
-      `获取 Key（建议先问用户是否同意打开浏览器）：\n` +
-      `  $ node ${join(SKILL_DIR, 'scripts', 'cli.mjs')} open-portal\n` +
-      `  或手动访问：${PORTAL_URL}（未登录会自动跳到 /#/login）\n\n` +
-      `配置 Key：\n` +
-      `  mkdir -p ~/.wind-aimarket && echo "WIND_API_KEY=ak_xxx" > ~/.wind-aimarket/config`,
+      `① 获取 Key（建议先问用户是否同意打开浏览器）：\n` +
+      `   $ node ${join(SKILL_DIR, 'scripts', 'cli.mjs')} open-portal\n` +
+      `   或手动访问：${PORTAL_URL}（未登录会自动跳到 /#/login）\n\n` +
+      `② 配置 Key（请向用户确认存放位置，推荐全局）：\n` +
+      `   A. 全局共享【推荐 — 所有 wind skill 共用】\n` +
+      `      mkdir -p ~/.wind-aimarket && echo "WIND_API_KEY=ak_xxx" > ~/.wind-aimarket/config\n` +
+      `   B. 仅当前 skill\n` +
+      `      echo '{"wind_api_key":"ak_xxx"}' > ${join(SKILL_DIR, 'config.json')}\n` +
+      `   C. 当前会话临时\n` +
+      `      export WIND_API_KEY=ak_xxx`,
   });
 }
 
