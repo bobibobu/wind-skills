@@ -1,4 +1,4 @@
-﻿---
+---
 name: wind-find-finance-skill
 description: AIMarket 金融能力路由器。当用户询问金融能力清单、能力边界、安装建议，或提出金融数据 / 分析 / 工具相关问题但 AI 不确定该调用哪个具体 skill 时，触发本 skill 读取本地能力目录，统筹 Wind、同花顺 iFinD、东方财富等金融能力，给出已安装能力、推荐路由、必要安装命令与升级建议。
 ---

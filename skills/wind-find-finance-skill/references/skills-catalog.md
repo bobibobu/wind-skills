@@ -1,4 +1,4 @@
-﻿---
+---
 name: aimarket-skills-catalog
 description: AIMarket 平台金融 skill 清单本地副本。覆盖 Wind、同花顺 iFinD、东方财富等本地金融能力。
 ---
