@@ -35,7 +35,6 @@ examples:
 
 ---
 
-
 ## 1. 数据范围
 
 8 个 server_type 各自能干什么：
