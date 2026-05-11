@@ -190,7 +190,7 @@ node scripts/cli.mjs call index_data get_index_kline '{"windcode":"000300.SH","b
 | `get_fund_financials` | 财务（利润 / 净值 / 收入 / 费用 / 分红）| `"005827.OF 2024 年净利润和分红"` |
 | `get_fund_holdings` | 持仓 + 资产配置（重仓股 / 申万 / Wind / 中信行业）| `"005827.OF 最新一期重仓股"` |
 | `get_fund_performance` | 业绩 + 排名 + ETF / 二级交易 | `"005827.OF 近 1 年业绩排名"` |
-| `get_fund_shareholders` | 持有人结构（个人 / 机构 / 申购赎回 / 规模变动）| `"005827.OF 持有人结构"` |
+| `get_fund_holders` | 持有人结构（个人 / 机构 / 申购赎回 / 规模变动）| `"005827.OF 持有人结构"` |
 | `get_fund_company_info` | 基金管理公司档案 + 经理团队 | `"易方达基金管理公司档案"` |
 
 #### `index_data` NL（3 个）
