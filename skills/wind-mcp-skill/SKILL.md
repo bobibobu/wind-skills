@@ -391,8 +391,8 @@ cli.mjs 大部分错误会自动输出错误码 + 处理建议（stderr），照
 
 | 错误                                           | 解法                                                               |
 | ---------------------------------------------- | ------------------------------------------------------------------ |
-| `indexes` 字段不识别 / 字段名不存在          | Read `references/indicators.md` 复制粘贴中文字段名（不要自己拼） |
-| 工具不存在 / 未知 server_type / schema 对不上  | 跑 `npx skills update wind-mcp-skill -y` 拉新版                  |
+| `indexes` 字段不识别 / 字段名不存在          | 按 `references/indicators.md` 复制表内字段名（不要自己拼）；仍不可用则改用对应 NL 工具或说明快照字段不可用 |
+| 工具不存在 / 未知 server_type / schema 对不上  | 先按 `## 1. 数据范围` 的工具清单和 `## 3. 工具表` 重新核对 `server_type` / `tool_name` / `params_json` 并重试一次；仍不通过再建议升级 skill |
 | 美股 / 港股调用 `stock_data` 工具返空 / 报错 | 切到 `global_stock_data` 同名工具（参数签名一致）                |
 | 调用似乎啥都没报                               | 检查命令是否在本 SKILL.md 所在目录下执行                           |
 
@@ -404,4 +404,4 @@ cli.mjs 大部分错误会自动输出错误码 + 处理建议（stderr），照
 
 **看到该提示时，会话首次必须转告用户一次**（同会话再次调用不重复）：把清单和升级命令完整带给用户，命令已含 `-g -y` 等参数，直接照搬即可。Gitee 装的 skill 升级路径跟 GitHub 不同，按 stderr 提示走。
 
-⚠️ 如遇"工具不存在 / 字段不符"等版本相关错误，可建议用户跑 `npx skills update -g -y` 拉最新后重试。
+⚠️ 如遇"工具不存在 / 字段不符"等疑似版本相关错误，先按本文档工具清单、工具表和 CLI stderr 建议重新检查 `server_type` / `tool_name` / `params_json` 并重试一次；检查仍不通过或确认本地 schema 与文档不一致后，再建议用户跑 `npx skills update -g -y` 拉最新后重试。
