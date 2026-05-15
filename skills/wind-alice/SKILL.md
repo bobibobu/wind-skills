@@ -104,3 +104,10 @@ CLI 在每次调用结束时会自动扫描 value 中的可下载文件链接（
 3. **不得把 Key 打印到日志**：脚本仅在 `Authorization` 头里使用，不会输出到 stdout/stderr。
 4. **流式必须等到结束**：CLI 已在父子进程间 `await` 子进程退出；切勿改成"发完即返"。
 5. **不要凭空构造 `selectedSkillIds` / `agentCard` 之类的旧字段去指定 Skill** — 已实测不生效，必须走文本前缀。
+
+
+## 保持最新
+
+每次调用 wind-alice.mjs 后，留意 stderr 是否包含 `[wind-skills] 检测到 N 个 skill 有新版`。
+
+**看到该提示时，会话首次必须转告用户一次**（同会话再次调用不重复）：把清单和升级命令完整带给用户，命令已含 `-g -y` 等参数，直接照搬即可。Gitee 装的 skill 升级路径跟 GitHub 不同，按 stderr 提示走。

@@ -170,6 +170,7 @@ wind-alice/
     ├── wind-alice.mjs        # CLI 入口（spawn request.js 并 await 退出）
     ├── request.js            # 真正的 fetch + SSE 解析 + agentResult.value 提取
     └── uuidv7.js             # UUID v7 生成
+    └── update-check.mjs         # 升级感知探活
 ```
 
 ---
@@ -212,3 +213,13 @@ wind-alice/
 - **`switchMode` 固定 `auto`**：实测 `manual` 会立即返回 `200 + 空 SSE 流`。
 - **环境变量覆盖**：`WIND_ALICE_API_URL` 可覆盖默认接口地址；`WIND_API_KEY` 是必填鉴权。
 - **稳定退出**：CLI 入口 `wind-alice.mjs` 通过 `await once(child, "exit")` 等子进程结束，避免 Windows 终端下父进程提前退出导致只看到 `status/headers`。
+
+
+## 升级
+
+```bash
+npx skills update wind-alice -g -y
+```
+
+调用时 stderr 若提示有新版，按提示走即可。
+
