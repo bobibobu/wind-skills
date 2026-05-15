@@ -14,6 +14,7 @@ export function spawnUpdateCheck() {
   try {
     if (!existsSync(UPDATE_CHECK_PATH)) return;
     const child = spawn("node", [UPDATE_CHECK_PATH], {
+      cwd: SKILL_DIR,
       detached: true,
       stdio: "ignore",
       windowsHide: true,

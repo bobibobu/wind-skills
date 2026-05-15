@@ -108,9 +108,17 @@ function findLockFiles() {
     candidates.add(join(dir, 'skills-lock.json'));
   }
 
-  // ③ 从 process.cwd() 向上找项目 lock
-  for (const dir of walkUp(process.cwd())) {
-    candidates.add(join(dir, 'skills-lock.json'));
+  // ③ 从 cwd 向上找项目 lock（cwd 被删时跳过，避免 ENOENT）
+  let cwd;
+  try {
+    cwd = process.cwd();
+  } catch {
+    cwd = null;
+  }
+  if (cwd) {
+    for (const dir of walkUp(cwd)) {
+      candidates.add(join(dir, 'skills-lock.json'));
+    }
   }
 
   return [...candidates].filter(p => existsSync(p));
