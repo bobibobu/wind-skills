@@ -7,7 +7,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 
-const SKILL_VERSION = '1.5.0';
+const SKILL_VERSION = '1.6.0';
 const OUTPUT_SCHEMA_VERSION = 1;
 let activeCommand = 'help';
 
@@ -334,8 +334,9 @@ const ERROR_PATTERNS = [
   ['BALANCE_INSUFFICIENT', /余额不足|请先充值|insufficient.*balance/i,             'API Key 计费余额不足。开发者中心充值或换备用 Key。'],
   ['RATE_LIMIT_QPS',       /请求过于频繁|qps.*limit|too.*frequent/i,               '请求过于频繁。等几秒重试（可重试）。'],
   ['KEY_INVALID',          /密钥无效|key.*invalid|unauthorized|认证失败|auth.*fail/i,   'API Key 无效或过期 → 开发者中心重新生成。'],
-  ['NO_RESULTS',           /未获取到数据|"NO_RESULTS"/,                            '未获取到匹配数据。先在不改变用户意图的前提下调整关键词或参数。'],
-  ['PARAM_VALIDATION_ERROR', /TOOL_ERROR|参数验证失败|invalid.*param/i,              '参数验证失败。先按 SKILL.md 工具表核对字段名、必填项、日期格式和枚举值后重试。'],
+  ['NO_RESULTS',           /未获取到数据|"NO_RESULTS"|no\s*results?|not\s*found|empty\s*result/i, '未获取到匹配数据。先在不改变用户意图的前提下调整关键词或参数。'],
+  ['PARAM_VALIDATION_ERROR', /参数验证失败|参数.*(错误|非法|无效)|字段.*(不存在|不识别|不支持|非法)|invalid\s*(param|argument|field)|missing\s*(param|argument|field|required)/i, '后端参数验证失败。先按 SKILL.md 工具表核对字段名、必填项、日期格式和枚举值后重试。'],
+  ['TOOL_RUNTIME_ERROR',    /TOOL_ERROR|tool.*error|工具.*(执行|运行).*错误|runtime.*error/i,      '后端工具运行错误。保留后端原文，先检查请求是否过大或口径是否受支持；不要直接切换工具绕过。'],
   ['KEY_MISSING',          /WIND_API_KEY 未配置/,                                   'API Key 未配置。先 `node scripts/cli.mjs open-portal` 拿 Key，再选三种方式之一配置。'],
   ['UNKNOWN_SERVER_TYPE',  /未知 server_type/,                                      'server_type 不在可用列表内。先 `cli.mjs` 看 USAGE 列表，按列表填。'],
   ['UNKNOWN_TOOL_NAME',    /工具名不属于/,                                           'tool_name 不在该 server_type 的工具清单内。按 SKILL.md 和 references/tool-manifest.json 重新选择。'],
@@ -356,6 +357,9 @@ function getErrorHint(code, fallback) {
   for (const [c, , hint] of ERROR_PATTERNS) {
     if (c === code) return hint;
   }
+  if (code === 'TOOL_RUNTIME_ERROR') {
+    return '后端工具运行错误。保留后端原文，先检查请求规模、字段口径和数据覆盖；不要直接切换工具绕过。';
+  }
   return fallback || '未知错误，参考后端原文 + 联系万得支持。';
 }
 
@@ -365,7 +369,7 @@ const NO_FALLBACK_CODES = new Set([
   'INVALID_PARAMS_JSON', 'UNKNOWN_SERVER_TYPE', 'UNKNOWN_TOOL_NAME', 'TOOL_MANIFEST_INVALID', 'UNKNOWN_SCOPE',
   'USAGE_ERROR', 'OPEN_PORTAL_FAILED', 'CONFIG_WRITE_ERROR', 'KEY_MISSING', 'KEY_INVALID', 'KEY_FORBIDDEN_SERVER',
   'RATE_LIMIT_DAILY', 'RATE_LIMIT_QPS', 'BALANCE_INSUFFICIENT', 'NETWORK_ERROR',
-  'SERVER_5XX', 'RESPONSE_PARSE_ERROR', 'MCP_PROTOCOL_ERROR', 'UNKNOWN',
+  'SERVER_5XX', 'RESPONSE_PARSE_ERROR', 'MCP_PROTOCOL_ERROR', 'TOOL_RUNTIME_ERROR', 'UNKNOWN',
 ]);
 const RETRYABLE_CODES = new Set(['RATE_LIMIT_QPS', 'NETWORK_ERROR', 'SERVER_5XX']);
 const ERROR_CATEGORIES = [
@@ -375,7 +379,7 @@ const ERROR_CATEGORIES = [
   ['auth', new Set(['KEY_MISSING', 'KEY_INVALID', 'KEY_FORBIDDEN_SERVER'])],
   ['quota', new Set(['RATE_LIMIT_DAILY', 'RATE_LIMIT_QPS', 'BALANCE_INSUFFICIENT'])],
   ['network', new Set(['NETWORK_ERROR'])],
-  ['backend', new Set(['SERVER_5XX', 'RESPONSE_PARSE_ERROR', 'NO_RESULTS', 'MCP_PROTOCOL_ERROR'])],
+  ['backend', new Set(['SERVER_5XX', 'RESPONSE_PARSE_ERROR', 'NO_RESULTS', 'MCP_PROTOCOL_ERROR', 'TOOL_RUNTIME_ERROR'])],
 ];
 const AGENT_ACTIONS = {
   USAGE_ERROR: '读取 data.usage，按可用子命令和参数格式重新构造命令。',
@@ -398,6 +402,7 @@ const AGENT_ACTIONS = {
   RESPONSE_PARSE_ERROR: '后端响应格式异常或发生变化；保留原始错误信息并联系 Wind 支持。',
   NO_RESULTS: '在不改变用户意图的前提下调整关键词或参数；专项路径仍不适合时，可用 analytics_data 做结构化取数兜底。',
   MCP_PROTOCOL_ERROR: '检查 error.message；若能明确修正请求形态则修正，否则保留后端原文并联系支持。',
+  TOOL_RUNTIME_ERROR: '保留后端原文，检查请求规模、字段口径和数据覆盖；不能明确修正时停止并告知用户。',
   UNKNOWN: '不要盲目重试；先检查 error.message 和 context，能明确定位本地问题则修正，否则报告原始错误。',
 };
 
@@ -460,12 +465,6 @@ function parseSSE(text) {
     }
   }
   throw new Error(`响应格式无法识别（既非 SSE 也非纯 JSON）。原文前 200 字符：${text.slice(0, 200)}`);
-}
-
-function parseToolText(result) {
-  const text = result?.content?.find(item => item?.type === 'text' && typeof item.text === 'string')?.text;
-  if (!text) return null;
-  try { return JSON.parse(text); } catch { return null; }
 }
 
 const HTTP_ERROR_MAP = {
@@ -588,11 +587,9 @@ async function cmdCall(server_type, toolName, paramsJson) {
     name: toolName,
     arguments: args,
   });
-  const parsed = parseToolText(result);
   return {
     server_type,
     tool: toolName,
-    ...(parsed ? { parsed } : {}),
     result,
   };
 }

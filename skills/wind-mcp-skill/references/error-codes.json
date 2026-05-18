@@ -122,6 +122,12 @@
       "fallback_allowed": false,
       "agent_action": "检查 error.message；若能明确修正请求形态则修正，否则保留后端原文并联系支持。"
     },
+    "TOOL_RUNTIME_ERROR": {
+      "category": "backend",
+      "retryable": false,
+      "fallback_allowed": false,
+      "agent_action": "保留后端原文，检查请求规模、字段口径和数据覆盖；不能明确修正时停止并告知用户。"
+    },
     "UNKNOWN": {
       "category": "unknown",
       "retryable": false,
