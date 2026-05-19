@@ -54,6 +54,7 @@ const SKILL_DIR = dirname(dirname(fileURLToPath(import.meta.url)));
 const UPDATE_CHECK_PATH = join(SKILL_DIR, 'scripts', 'update-check.mjs');
 const UPDATE_STATE_FILE = join(homedir(), '.cache', 'wind-aimarket', 'update-state.json');
 const TOOL_MANIFEST_PATH = join(SKILL_DIR, 'references', 'tool-manifest.json');
+const SKILL_NAME = 'wind-mcp-skill';
 
 const CALL_EXAMPLES = [
   `cli.mjs call stock_data get_stock_basicinfo '{"question":"600519.SH 公司基本档案"}'`,
@@ -116,11 +117,34 @@ function filterAlreadyUpgraded(outdated) {
   });
 }
 
+// Cache schema 兼容: v3 unified ({schemaVersion, skills:{<name>:{...}}}) vs legacy 顶层平铺
+function readCacheView() {
+  if (!existsSync(UPDATE_STATE_FILE)) return null;
+  try {
+    const raw = JSON.parse(readFileSync(UPDATE_STATE_FILE, 'utf8'));
+    if (raw?.schemaVersion === 3 && raw?.skills && typeof raw.skills === 'object') {
+      return { raw, state: raw.skills[SKILL_NAME] || null, isV3: true };
+    }
+    return { raw, state: raw, isV3: false };
+  } catch { return null; }
+}
+
+function writeCacheView(view, newState) {
+  try {
+    if (view.isV3) {
+      view.raw.skills[SKILL_NAME] = newState;
+      writeFileSync(UPDATE_STATE_FILE, JSON.stringify(view.raw, null, 2));
+    } else {
+      writeFileSync(UPDATE_STATE_FILE, JSON.stringify(newState, null, 2));
+    }
+  } catch {}
+}
+
 function collectUpdateNotices() {
   try {
-    if (!existsSync(UPDATE_STATE_FILE)) return [];
-    const original = JSON.parse(readFileSync(UPDATE_STATE_FILE, 'utf8'));
-    let state = original;
+    const view = readCacheView();
+    if (!view || !view.state) return [];
+    let state = view.state;
 
     // 先修正已升级但缓存仍提示过期的状态，再决定是否返回 notice。
     if (state.status === 'update_available' && Array.isArray(state.outdated) && state.outdated.length > 0) {
@@ -131,12 +155,12 @@ function collectUpdateNotices() {
           ttlMs: 60 * 60 * 1000,
           lastCheck: new Date().toISOString(),
         };
-        if (original.snoozedUntil) state.snoozedUntil = original.snoozedUntil;
-        if (typeof original.snoozeLevel === 'number') state.snoozeLevel = original.snoozeLevel;
-        try { writeFileSync(UPDATE_STATE_FILE, JSON.stringify(state, null, 2)); } catch {}
+        if (view.state.snoozedUntil) state.snoozedUntil = view.state.snoozedUntil;
+        if (typeof view.state.snoozeLevel === 'number') state.snoozeLevel = view.state.snoozeLevel;
+        writeCacheView(view, state);
       } else if (stillOutdated.length < state.outdated.length) {
         state = { ...state, outdated: stillOutdated };
-        try { writeFileSync(UPDATE_STATE_FILE, JSON.stringify(state, null, 2)); } catch {}
+        writeCacheView(view, state);
       }
     }
 

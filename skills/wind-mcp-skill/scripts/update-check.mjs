@@ -9,7 +9,7 @@
 //   - v2: 不用 baseline,反查 lock.updatedAt 时刻的真实 commit,精确对比
 // 统一缓存: ~/.cache/wind-aimarket/update-state.json (schema v3, 多 skill 共享)
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, openSync, closeSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, dirname, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,6 +35,7 @@ const INSTALLED_AT_TOLERANCE_MS = 60 * 60 * 1000;
 const LEGACY_CACHE_FILES = [
   'wind-find-update-state.json',
   'wind-find-update-baseline.json',
+  'update-baseline.json',  // v1 baseline 残留(v2 反查方案不再使用)
 ];
 
 function readUnifiedCache() {
@@ -48,9 +49,39 @@ function readUnifiedCache() {
   } catch { return { schemaVersion: CACHE_SCHEMA_VERSION, skills: {} }; }
 }
 
-function writeUnifiedCacheSkill(skillState) {
-  try {
-    if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
+// 文件锁: O_EXCL 创建 lockfile,陈旧锁(>30s)自动清理。拿不到锁等 100ms 重试,5 次后放弃(不阻塞)。
+const LOCK_FILE = CACHE_FILE + '.lock';
+const LOCK_STALE_MS = 30_000;
+const LOCK_RETRY_DELAY_MS = 100;
+const LOCK_MAX_RETRIES = 5;
+
+async function withLock(fn) {
+  for (let i = 0; i < LOCK_MAX_RETRIES; i++) {
+    try {
+      if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
+      // 陈旧锁清理(上次进程崩了没清)
+      try {
+        const st = statSync(LOCK_FILE);
+        if (Date.now() - st.mtimeMs > LOCK_STALE_MS) unlinkSync(LOCK_FILE);
+      } catch {}
+      // O_EXCL 独占创建
+      const fd = openSync(LOCK_FILE, 'wx');
+      try {
+        return fn();
+      } finally {
+        try { closeSync(fd); } catch {}
+        try { unlinkSync(LOCK_FILE); } catch {}
+      }
+    } catch (e) {
+      if (e?.code !== 'EEXIST') return;  // 非"已存在"的错(权限/磁盘),直接放弃
+      await new Promise(r => setTimeout(r, LOCK_RETRY_DELAY_MS));
+    }
+  }
+  // 拿不到锁就放弃,绝不阻塞主流程
+}
+
+async function writeUnifiedCacheSkill(skillState) {
+  await withLock(() => {
     const full = readUnifiedCache();
     const prev = full.skills[SKILL_NAME];
     const merged = { ...skillState, lastCheck: new Date().toISOString() };
@@ -58,7 +89,7 @@ function writeUnifiedCacheSkill(skillState) {
     if (typeof prev?.snoozeLevel === 'number') merged.snoozeLevel = prev.snoozeLevel;
     full.skills[SKILL_NAME] = merged;
     writeFileSync(CACHE_FILE, JSON.stringify(full, null, 2));
-  } catch {}
+  });
 }
 
 function cleanupLegacyFiles() {
@@ -257,14 +288,12 @@ async function main() {
   const entries = collectEntries();
   const lockSignature = buildLockSignature(entries);
 
-  if (isCacheFresh(myCache, lockSignature)) {
-    printNotice(myCache);
-    return;
-  }
+  // cache 还新鲜 → 直接静默退出。打印交给 cli.mjs 走 JSON envelope。
+  if (isCacheFresh(myCache, lockSignature)) return;
 
   if (entries.length === 0) {
     const state = { status: 'unknown', reason: 'lock_missing', ttlMs: TTL_UNKNOWN_MS, lockSignature };
-    writeUnifiedCacheSkill(state);
+    await writeUnifiedCacheSkill(state);
     printNotice(state);
     return;
   }
@@ -346,21 +375,21 @@ async function main() {
 
   if (rateLimited) {
     const state = { status: 'transient_error', reason: 'rate_limit', ttlMs: TTL_RATE_LIMIT_MS, lockSignature };
-    writeUnifiedCacheSkill(state);
+    await writeUnifiedCacheSkill(state);
     printNotice(state);
     return;
   }
 
   if (outdated.length > 0) {
     const state = { status: 'update_available', outdated, ttlMs: TTL_AVAILABLE_MS, lockSignature };
-    writeUnifiedCacheSkill(state);
+    await writeUnifiedCacheSkill(state);
     printNotice(state);
     return;
   }
 
   const totalHandled = unknownDetails.length + (transientError ? 1 : 0);
   if (totalHandled < entries.length) {
-    writeUnifiedCacheSkill({ status: 'up_to_date', ttlMs: TTL_UP_TO_DATE_MS, lockSignature });
+    await writeUnifiedCacheSkill({ status: 'up_to_date', ttlMs: TTL_UP_TO_DATE_MS, lockSignature });
     return;
   }
 
@@ -372,7 +401,7 @@ async function main() {
       ttlMs: TTL_TRANSIENT_MS,
       lockSignature,
     };
-    writeUnifiedCacheSkill(state);
+    await writeUnifiedCacheSkill(state);
     printNotice(state);
     return;
   }
@@ -384,7 +413,7 @@ async function main() {
     ttlMs: TTL_UNKNOWN_MS,
     lockSignature,
   };
-  writeUnifiedCacheSkill(state);
+  await writeUnifiedCacheSkill(state);
   printNotice(state);
 }
 
