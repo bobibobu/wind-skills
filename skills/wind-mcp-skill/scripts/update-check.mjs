@@ -288,8 +288,11 @@ async function main() {
   const entries = collectEntries();
   const lockSignature = buildLockSignature(entries);
 
-  // cache 还新鲜 → 直接静默退出。打印交给 cli.mjs 走 JSON envelope。
-  if (isCacheFresh(myCache, lockSignature)) return;
+  // cache 还新鲜 → 打印缓存中的通知后退出。详细结构化输出由 cli.mjs 走 JSON envelope。
+  if (isCacheFresh(myCache, lockSignature)) {
+    if (myCache) printNotice(myCache);
+    return;
+  }
 
   if (entries.length === 0) {
     const state = { status: 'unknown', reason: 'lock_missing', ttlMs: TTL_UNKNOWN_MS, lockSignature };
@@ -368,6 +371,7 @@ async function main() {
       latest: shortHash(currentSha),
       sourceUrl,
       host: parsed.host,
+      installedHash: entry.skillFolderHash || entry.computedHash || null,
     });
   }
 
