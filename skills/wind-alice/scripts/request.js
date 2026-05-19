@@ -279,7 +279,7 @@ function getApiKey() {
     try {
       const cfg = JSON.parse(readFileSync(localConfig, "utf8"));
       if (cfg.wind_api_key) return cfg.wind_api_key;
-    } catch {}
+    } catch { }
   }
 
   // 全局 Key 存储位置（与其它 wind 技能可共用）
@@ -288,7 +288,7 @@ function getApiKey() {
     try {
       const env = parseDotenv(readFileSync(globalConfig, "utf8"));
       if (env.WIND_API_KEY) return env.WIND_API_KEY;
-    } catch {}
+    } catch { }
   }
 
   die("KEY_MISSING", "WIND_API_KEY 未配置", {
@@ -567,7 +567,7 @@ function deriveFilenameFromUrl(url, fallback) {
     const u = new URL(url);
     const last = u.pathname.split("/").filter(Boolean).pop();
     if (last) return decodeURIComponent(last);
-  } catch {}
+  } catch { }
   return fallback || "downloaded";
 }
 
@@ -646,7 +646,7 @@ function printDownloadHints() {
   lines.push("");
   lines.push("下载方式：HTTP GET，请求头携带 Bearer Token");
   lines.push("  Authorization: Bearer <WIND_API_KEY>");
-  lines.push("  (WIND_API_KEY 为万得 AI Market 提供的 apiKey)");
+  lines.push("  (WIND_API_KEY 为 Wind AIFin Market 提供的 apiKey)");
 
   console.error(lines.join("\n"));
 }
@@ -718,7 +718,7 @@ async function emitParsedEventsUnlessQuotaStreaming(reader, events) {
     return false;
   } catch (e) {
     if (e instanceof WindTrialQuotaExceeded) {
-      await reader.cancel().catch(() => {});
+      await reader.cancel().catch(() => { });
       process.exitCode = 1;
       return true;
     }
@@ -858,85 +858,85 @@ async function main() {
   const MAX_RETRIES = 10;
 
   try {
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    if (attempt > 0) {
-      const delay = Math.min(1000 * attempt, 10000);
-      console.error(
-        `[reconnect] attempt ${attempt}/${MAX_RETRIES}, waiting ${delay}ms...`,
-      );
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-
-    const requestBody =
-      attempt === 0 ? body : resubscribeBody({ params: body });
-
-    let response;
-    try {
-      response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(requestBody),
-      });
-    } catch (e) {
-      console.error(`[network error] ${e.message}`);
-      if (attempt < MAX_RETRIES) continue;
-      console.error("max retries exceeded");
-      process.exitCode = 1;
-      return;
-    }
-
-    console.log("status:", response.status, response.statusText);
-    console.log(
-      "headers:",
-      Object.fromEntries(response.headers.entries()),
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("request failed:");
-      console.error(errorText);
-      if (response.status >= 500 && attempt < MAX_RETRIES) continue;
-      process.exitCode = 1;
-      return;
-    }
-
-    const contentType = (response.headers.get("content-type") || "").toLowerCase();
-    const useSseReader =
-      contentType.includes("text/event-stream") && response.body != null;
-
-    if (useSseReader) {
-      let streamError = null;
-      try {
-        await drainSseStream(response);
-        printDownloadHints();
-        return;
-      } catch (e) {
-        streamError = e;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      if (attempt > 0) {
+        const delay = Math.min(1000 * attempt, 10000);
+        console.error(
+          `[reconnect] attempt ${attempt}/${MAX_RETRIES}, waiting ${delay}ms...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
-      console.error(`[stream error] ${streamError.message}`);
-      if (attempt < MAX_RETRIES) continue;
-      console.error("max retries exceeded");
-      process.exitCode = 1;
+      const requestBody =
+        attempt === 0 ? body : resubscribeBody({ params: body });
+
+      let response;
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(requestBody),
+        });
+      } catch (e) {
+        console.error(`[network error] ${e.message}`);
+        if (attempt < MAX_RETRIES) continue;
+        console.error("max retries exceeded");
+        process.exitCode = 1;
+        return;
+      }
+
+      console.log("status:", response.status, response.statusText);
+      console.log(
+        "headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("request failed:");
+        console.error(errorText);
+        if (response.status >= 500 && attempt < MAX_RETRIES) continue;
+        process.exitCode = 1;
+        return;
+      }
+
+      const contentType = (response.headers.get("content-type") || "").toLowerCase();
+      const useSseReader =
+        contentType.includes("text/event-stream") && response.body != null;
+
+      if (useSseReader) {
+        let streamError = null;
+        try {
+          await drainSseStream(response);
+          printDownloadHints();
+          return;
+        } catch (e) {
+          streamError = e;
+        }
+
+        console.error(`[stream error] ${streamError.message}`);
+        if (attempt < MAX_RETRIES) continue;
+        console.error("max retries exceeded");
+        process.exitCode = 1;
+        return;
+      }
+
+      // 非 SSE：可能是 JSON-RPC error、整包 JSON、HTML、或网关误标的 SSE 文本
+      let bodyText;
+      try {
+        bodyText = await response.text();
+      } catch (e) {
+        console.error(`[read body error] ${e.message}`);
+        if (attempt < MAX_RETRIES) continue;
+        console.error("max retries exceeded");
+        process.exitCode = 1;
+        return;
+      }
+
+      consumeNonStreamBody(bodyText);
+      printDownloadHints();
       return;
     }
-
-    // 非 SSE：可能是 JSON-RPC error、整包 JSON、HTML、或网关误标的 SSE 文本
-    let bodyText;
-    try {
-      bodyText = await response.text();
-    } catch (e) {
-      console.error(`[read body error] ${e.message}`);
-      if (attempt < MAX_RETRIES) continue;
-      console.error("max retries exceeded");
-      process.exitCode = 1;
-      return;
-    }
-
-    consumeNonStreamBody(bodyText);
-    printDownloadHints();
-    return;
-  }
   } finally {
     maybePrintUpdateNotice();
   }

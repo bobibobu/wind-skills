@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-// update-check.mjs — 通用 wind-skills 升级感知探活脚本 (lock-driven)
+// update-check.mjs — 通用 wind-skills 升级感知探活脚本 v2(installedAt-反查方案)
 // 通用版：自动从目录路径检测 skill name，无需硬编码
-// 由各 skill 的 CLI 异步 spawn，读 lock 条目 → 用 sourceUrl 解析 host → 调对应 tree API 比对 hash
+// 由各 skill 的 CLI 异步 spawn,读 lock 条目 → 反查"装时刻"的远端 commit → 跟当前远端 tree SHA 对比
 // 设计: 完全静默,绝不阻塞主流程,任何异常吞掉
 //
-// 状态: up_to_date / update_available / unknown / transient_error
+// 与 baseline 方案(v1)的区别:
+//   - v1: 用 baseline 文件存"上次远端 SHA",首次 check 把当下当基准 → "装老版本"漏报
+//   - v2: 不用 baseline,反查 lock.updatedAt 时刻的真实 commit,精确对比
 // 统一缓存: ~/.cache/wind-aimarket/update-state.json (schema v3, 多 skill 共享)
-//           ~/.cache/wind-aimarket/update-baseline.json (多 skill 共享)
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -18,15 +19,18 @@ const SKILL_NAME = basename(dirname(SCRIPT_DIR));
 
 const CACHE_DIR = join(homedir(), '.cache', 'wind-aimarket');
 const CACHE_FILE = join(CACHE_DIR, 'update-state.json');
-const BASELINE_FILE = join(CACHE_DIR, 'update-baseline.json');
 const CACHE_SCHEMA_VERSION = 3;
 
 const TTL_UP_TO_DATE_MS    = 60 * 60 * 1000;
 const TTL_AVAILABLE_MS     = 12 * 60 * 60 * 1000;
 const TTL_UNKNOWN_MS       = 24 * 60 * 60 * 1000;
 const TTL_TRANSIENT_MS     =  5 * 60 * 1000;
+const TTL_RATE_LIMIT_MS    = 60 * 60 * 1000;
 
 const NETWORK_TIMEOUT_MS = 5_000;
+const INSTALLED_AT_TOLERANCE_MS = 60 * 60 * 1000;
+
+// ───── 统一缓存读写 ─────
 
 const LEGACY_CACHE_FILES = [
   'wind-find-update-state.json',
@@ -57,29 +61,14 @@ function writeUnifiedCacheSkill(skillState) {
   } catch {}
 }
 
-function readUnifiedBaseline() {
-  if (!existsSync(BASELINE_FILE)) return {};
-  try {
-    const data = JSON.parse(readFileSync(BASELINE_FILE, 'utf8'));
-    return (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
-  } catch { return {}; }
-}
-
-function writeSkillBaseline(skillBaseline) {
-  try {
-    if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
-    const full = readUnifiedBaseline();
-    full[SKILL_NAME] = skillBaseline;
-    writeFileSync(BASELINE_FILE, JSON.stringify(full, null, 2));
-  } catch {}
-}
-
 function cleanupLegacyFiles() {
   for (const name of LEGACY_CACHE_FILES) {
     const p = join(CACHE_DIR, name);
     try { if (existsSync(p)) unlinkSync(p); } catch {}
   }
 }
+
+// ───── lock 签名 ─────
 
 function isCacheFresh(cache, currentSignature) {
   if (!cache?.lastCheck || !cache?.ttlMs) return false;
@@ -94,6 +83,8 @@ function buildLockSignature(entries) {
     .sort()
     .join('\n');
 }
+
+// ───── lock 文件探测 ─────
 
 function walkUp(startDir) {
   const dirs = [];
@@ -137,6 +128,8 @@ function collectEntries() {
   return found;
 }
 
+// ───── 条目解析 ─────
+
 function parseSourceUrl(sourceUrl) {
   if (typeof sourceUrl !== 'string' || !sourceUrl) return null;
   let host = null;
@@ -148,50 +141,87 @@ function parseSourceUrl(sourceUrl) {
   return { host, owner: m[1], repo: m[2] };
 }
 
+function normalizeSkillDir(skillPath) {
+  return String(skillPath || '')
+    .replace(/\\/g, '/')
+    .replace(/\/?SKILL\.md$/i, '')
+    .replace(/\/+$/, '');
+}
+
+// ───── HTTP ─────
+
 async function fetchJson(url) {
   try {
     const resp = await fetch(url, {
       headers: { 'User-Agent': `${SKILL_NAME}-update-check` },
       signal: AbortSignal.timeout(NETWORK_TIMEOUT_MS),
     });
-    if (!resp.ok) return { error: `http_${resp.status}` };
+    if (!resp.ok) {
+      if (resp.status === 403 || resp.status === 429) {
+        const remaining = resp.headers.get('x-ratelimit-remaining');
+        if (remaining === '0' || resp.status === 429) return { error: 'rate_limit' };
+      }
+      return { error: `http_${resp.status}` };
+    }
     return { data: await resp.json() };
   } catch (e) {
     return { error: e?.name === 'TimeoutError' ? 'timeout' : 'network' };
   }
 }
 
-async function fetchTree({ host, owner, repo }) {
-  if (host === 'github') {
-    const r = await fetchJson(`https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`);
-    if (r.data && Array.isArray(r.data.tree)) return { tree: r.data };
-    return { error: r.error || 'shape' };
-  }
-  if (host === 'gitee') {
-    for (const branch of ['main', 'master']) {
-      const r = await fetchJson(`https://gitee.com/api/v5/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
-      if (r.data && Array.isArray(r.data.tree)) return { tree: r.data };
-    }
-    return { error: 'shape' };
-  }
-  return { error: 'unsupported_host' };
+// ───── 远端 API ─────
+
+function apiBase(host) {
+  return host === 'github' ? 'https://api.github.com' : 'https://gitee.com/api/v5';
 }
 
-function findSkillSha(tree, skillPath) {
-  const dir = String(skillPath || '')
-    .replace(/\\/g, '/')
-    .replace(/\/?SKILL\.md$/i, '')
-    .replace(/\/+$/, '');
-  if (!dir) return tree.sha || null;
-  return tree.tree.find(t => t.type === 'tree' && t.path === dir)?.sha || null;
+async function fetchTreeBySha({ host, owner, repo }, sha) {
+  const r = await fetchJson(`${apiBase(host)}/repos/${owner}/${repo}/git/trees/${encodeURIComponent(sha)}?recursive=1`);
+  if (r.error) return { error: r.error };
+  if (r.data && Array.isArray(r.data.tree)) return { tree: r.data };
+  return { error: 'shape' };
+}
+
+async function fetchCurrentTree(parsed, ref) {
+  const branches = ref ? [ref] : (parsed.host === 'gitee' ? ['main', 'master'] : ['HEAD', 'main', 'master']);
+  let lastError = null;
+  for (const branch of branches) {
+    const r = await fetchTreeBySha(parsed, branch);
+    if (r.tree) return r;
+    lastError = r.error;
+    if (r.error === 'rate_limit') return r;
+  }
+  return { error: lastError || 'shape' };
+}
+
+async function fetchCommitAtTime({ host, owner, repo }, ref, skillDir, installedAt) {
+  const until = new Date(new Date(installedAt).getTime() + INSTALLED_AT_TOLERANCE_MS).toISOString();
+  const params = new URLSearchParams({ until, per_page: '1' });
+  if (skillDir) params.set('path', skillDir);
+  if (ref) params.set('sha', ref);
+  const url = `${apiBase(host)}/repos/${owner}/${repo}/commits?${params.toString()}`;
+  const r = await fetchJson(url);
+  if (r.error) return { error: r.error };
+  if (!Array.isArray(r.data) || r.data.length === 0) return { error: 'no_commit_at_time' };
+  const sha = r.data[0]?.sha;
+  if (typeof sha !== 'string') return { error: 'commit_shape' };
+  return { sha };
+}
+
+function findSkillSha(tree, skillDir) {
+  if (!skillDir) return tree.sha || null;
+  return tree.tree.find(t => t.type === 'tree' && t.path === skillDir)?.sha || null;
 }
 
 function shortHash(h) {
   return typeof h === 'string' ? h.slice(0, 7) : '';
 }
 
+// ───── 通知打印 ─────
+
 function printNotice(state) {
   if (state.snoozedUntil && new Date(state.snoozedUntil) > new Date()) return;
+
   if (state.status === 'update_available') {
     const lines = ['', `[wind-skills] 检测到 ${state.outdated.length} 个 skill 有新版:`];
     for (const o of state.outdated) {
@@ -206,67 +236,154 @@ function printNotice(state) {
     process.stderr.write(lines.join('\n') + '\n');
     return;
   }
+
   if (state.status === 'transient_error') {
     process.stderr.write(`\n[wind-skills] 检查更新失败,可能是网络问题(reason=${state.reason || 'unknown'})\n\n`);
     return;
   }
+
   if (state.status === 'unknown') {
     process.stderr.write(`\n[wind-skills] 无法确认是否最新(reason=${state.reason || 'unknown'})\n\n`);
   }
 }
 
+// ───── 主逻辑 ─────
+
 async function main() {
   cleanupLegacyFiles();
+
   const fullCache = readUnifiedCache();
   const myCache = fullCache.skills[SKILL_NAME] || null;
   const entries = collectEntries();
   const lockSignature = buildLockSignature(entries);
-  if (isCacheFresh(myCache, lockSignature)) { printNotice(myCache); return; }
+
+  if (isCacheFresh(myCache, lockSignature)) {
+    printNotice(myCache);
+    return;
+  }
+
   if (entries.length === 0) {
     const state = { status: 'unknown', reason: 'lock_missing', ttlMs: TTL_UNKNOWN_MS, lockSignature };
     writeUnifiedCacheSkill(state);
     printNotice(state);
     return;
   }
-  const fullBaseline = readUnifiedBaseline();
-  const oldBaseline = fullBaseline[SKILL_NAME] || {};
-  const newBaseline = {};
+
   const outdated = [];
   const unknownDetails = [];
   let transientError = null;
+  let rateLimited = false;
+
   for (const { entry, lockPath } of entries) {
     const sourceUrl = entry.sourceUrl;
-    if (!sourceUrl) { unknownDetails.push({ reason: 'no_source_url', lockPath, source: entry.source }); continue; }
+    if (!sourceUrl) {
+      unknownDetails.push({ reason: 'no_source_url', lockPath, source: entry.source });
+      continue;
+    }
+
     const parsed = parseSourceUrl(sourceUrl);
-    if (!parsed) { unknownDetails.push({ reason: 'unsupported_host', lockPath, sourceUrl }); continue; }
-    const treeResult = await fetchTree(parsed);
-    if (treeResult.error) { transientError = { reason: treeResult.error, sourceUrl, host: parsed.host }; continue; }
-    const remoteSha = findSkillSha(treeResult.tree, entry.skillPath);
-    if (!remoteSha) { unknownDetails.push({ reason: 'path_missing', lockPath, sourceUrl, skillPath: entry.skillPath }); continue; }
-    const lockUpdatedAt = entry.updatedAt || entry.installedAt || null;
-    const key = lockPath;
-    const existing = oldBaseline[key];
-    if (!existing || existing.lockUpdatedAt !== lockUpdatedAt) { newBaseline[key] = { lockUpdatedAt, baselineRemoteSha: remoteSha, sourceUrl }; continue; }
-    if (existing.baselineRemoteSha === remoteSha) { newBaseline[key] = existing; continue; }
-    newBaseline[key] = existing;
-    outdated.push({ name: SKILL_NAME, current: shortHash(existing.baselineRemoteSha), latest: shortHash(remoteSha), sourceUrl, host: parsed.host });
+    if (!parsed) {
+      unknownDetails.push({ reason: 'unsupported_host', lockPath, sourceUrl });
+      continue;
+    }
+
+    const installedAt = entry.updatedAt || entry.installedAt;
+    if (!installedAt) {
+      unknownDetails.push({ reason: 'no_installed_at', lockPath });
+      continue;
+    }
+
+    const skillDir = normalizeSkillDir(entry.skillPath);
+    const ref = entry.ref || null;
+
+    // A: 当前远端 tree
+    const currentTreeResult = await fetchCurrentTree(parsed, ref);
+    if (currentTreeResult.error) {
+      if (currentTreeResult.error === 'rate_limit') { rateLimited = true; break; }
+      transientError = { reason: currentTreeResult.error, sourceUrl, host: parsed.host };
+      continue;
+    }
+
+    const currentSha = findSkillSha(currentTreeResult.tree, skillDir);
+    if (!currentSha) {
+      unknownDetails.push({ reason: 'path_missing', lockPath, sourceUrl, skillPath: entry.skillPath });
+      continue;
+    }
+
+    // B: 反查装时刻的 commit → tree
+    const installCommit = await fetchCommitAtTime(parsed, ref, skillDir, installedAt);
+    if (installCommit.error) {
+      if (installCommit.error === 'rate_limit') { rateLimited = true; break; }
+      unknownDetails.push({ reason: `commit_lookup_${installCommit.error}`, lockPath, sourceUrl });
+      continue;
+    }
+
+    const installedTreeResult = await fetchTreeBySha(parsed, installCommit.sha);
+    if (installedTreeResult.error) {
+      if (installedTreeResult.error === 'rate_limit') { rateLimited = true; break; }
+      transientError = { reason: installedTreeResult.error, sourceUrl, host: parsed.host };
+      continue;
+    }
+
+    const installedSha = findSkillSha(installedTreeResult.tree, skillDir);
+    if (!installedSha) {
+      unknownDetails.push({ reason: 'path_missing_at_install', lockPath, sourceUrl });
+      continue;
+    }
+
+    if (currentSha === installedSha) continue;
+
+    outdated.push({
+      name: SKILL_NAME,
+      current: shortHash(installedSha),
+      latest: shortHash(currentSha),
+      sourceUrl,
+      host: parsed.host,
+    });
   }
-  writeSkillBaseline(newBaseline);
+
+  // ───── 聚合 ─────
+
+  if (rateLimited) {
+    const state = { status: 'transient_error', reason: 'rate_limit', ttlMs: TTL_RATE_LIMIT_MS, lockSignature };
+    writeUnifiedCacheSkill(state);
+    printNotice(state);
+    return;
+  }
+
   if (outdated.length > 0) {
     const state = { status: 'update_available', outdated, ttlMs: TTL_AVAILABLE_MS, lockSignature };
     writeUnifiedCacheSkill(state);
     printNotice(state);
     return;
   }
+
   const totalHandled = unknownDetails.length + (transientError ? 1 : 0);
-  if (totalHandled < entries.length) { writeUnifiedCacheSkill({ status: 'up_to_date', ttlMs: TTL_UP_TO_DATE_MS, lockSignature }); return; }
+  if (totalHandled < entries.length) {
+    writeUnifiedCacheSkill({ status: 'up_to_date', ttlMs: TTL_UP_TO_DATE_MS, lockSignature });
+    return;
+  }
+
   if (transientError) {
-    const state = { status: 'transient_error', reason: transientError.reason, sourceUrl: transientError.sourceUrl, ttlMs: TTL_TRANSIENT_MS, lockSignature };
+    const state = {
+      status: 'transient_error',
+      reason: transientError.reason,
+      sourceUrl: transientError.sourceUrl,
+      ttlMs: TTL_TRANSIENT_MS,
+      lockSignature,
+    };
     writeUnifiedCacheSkill(state);
     printNotice(state);
     return;
   }
-  const state = { status: 'unknown', reason: unknownDetails[0].reason, details: unknownDetails, ttlMs: TTL_UNKNOWN_MS, lockSignature };
+
+  const state = {
+    status: 'unknown',
+    reason: unknownDetails[0].reason,
+    details: unknownDetails,
+    ttlMs: TTL_UNKNOWN_MS,
+    lockSignature,
+  };
   writeUnifiedCacheSkill(state);
   printNotice(state);
 }
