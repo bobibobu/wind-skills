@@ -11,7 +11,7 @@
 - 用户问"有什么金融能力" / 提了金融问题但 AI 不确定用哪个 → 触发本 skill
 - AI 读 `references/skills-catalog.md` → 列举平台所有可用 skill（数据发现 + 金融分析两类）
 - 给出对应安装命令，让用户自助挑装
-- 可运行 `scripts/check-updates.mjs` 按 lock-driven 方式检查是否有新版，并提示升级。
+- 可运行 `scripts/update-check.mjs` 按 lock-driven 方式检查是否有新版，并提示升级。
 
 ---
 
@@ -39,11 +39,11 @@ wind-find-finance-skill/
 ├── references/
 │   └── skills-catalog.md            # 平台 skill 清单本地副本
 ├── scripts/
-│   ├── check-updates.mjs             # 更新探活与提醒
+│   ├── update-check.mjs             # 更新探活与提醒
 └── README.md
 ```
 
-**没有数据 cli.mjs**——LLM 主要用 Read 处理；`scripts/check-updates.mjs` 只负责更新提醒。
+**没有数据 cli.mjs**——LLM 主要用 Read 处理；`scripts/update-check.mjs` 只负责更新提醒。
 
 ---
 
@@ -63,7 +63,7 @@ AI 加载 SKILL.md 后按守则操作：
 
 1. Read `references/skills-catalog.md` → 拿本地清单
 2. 按用户问题筛 1-3 个相关 skill 列出（含安装命令）
-3. 运行 `node scripts/check-updates.mjs` → 脚本从 lock 读取来源与 hash；若 stderr 出现 `[wind-skills]` 更新提示，会话首次转告用户
+3. 运行 `node scripts/update-check.mjs` → 脚本从 lock 读取来源与 hash；若 stderr 出现 `[wind-skills]` 更新提示，会话首次转告用户
 
 ---
 
