@@ -110,10 +110,12 @@ function filterAlreadyUpgraded(outdated) {
   return outdated.filter(o => {
     const live = installed[o.name];
     if (!live) return true;            // 找不到 lock,保守保留
+    // 优先用同类型的 skillFolderHash 比较（update-check.mjs v2 记录）
+    if (o.installedHash) return live === o.installedHash;
+    // 兼容旧缓存条目：退化到 shortHash 前缀匹配
     const cur = o.current || '';
     if (!cur) return true;
-    return live.startsWith(cur);       // hash 仍匹配 → 真未升级,保留
-                                       // hash 已变  → 已升级,过滤
+    return live.startsWith(cur);
   });
 }
 
