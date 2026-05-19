@@ -1,6 +1,6 @@
 # wind-find-finance-skill
 
-> **Wind AIMarket 金融能力入口（meta-skill）** · 读 skill 清单，帮 AI 列举平台能力并推荐安装
+> **Wind 金融能力入口（meta-skill）** · 读 skill 清单，帮 AI 列举平台能力并推荐安装
 
 ---
 
@@ -37,7 +37,7 @@ npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-find-fin
 wind-find-finance-skill/
 ├── SKILL.md                         # AI 加载的核心守则（5 步触发流程）
 ├── references/
-│   └── skills-catalog.md            # 平台 skill 清单本地副本（同源 aimarket.wind.com.cn/skill.md）
+│   └── skills-catalog.md            # 平台 skill 清单本地副本
 ├── scripts/
 │   ├── check-updates.mjs             # 更新探活与提醒
 └── README.md
@@ -51,13 +51,13 @@ wind-find-finance-skill/
 
 本 skill 是 **meta-skill**，跟数据 skill 的区别：
 
-| 维度 | 数据 skill（如 wind-mcp-skill） | 本 skill |
-|---|---|---|
-| 调底层 MCP server | ✅ | ❌ |
-| 需要 WIND_API_KEY | ✅ | ❌ |
-| 返回业务数据 | ✅ | ❌ |
-| 返回 skill 推荐 + 安装命令 | ❌ | ✅ |
-| 谁来调用 | AI 直接调（取数据答用户） | AI 在不确定用哪个 skill 时先调 |
+| 维度                       | 数据 skill（如 wind-mcp-skill） | 本 skill                       |
+| -------------------------- | ------------------------------- | ------------------------------ |
+| 调底层 MCP server          | ✅                              | ❌                             |
+| 需要 WIND_API_KEY          | ✅                              | ❌                             |
+| 返回业务数据               | ✅                              | ❌                             |
+| 返回 skill 推荐 + 安装命令 | ❌                              | ✅                             |
+| 谁来调用                   | AI 直接调（取数据答用户）       | AI 在不确定用哪个 skill 时先调 |
 
 AI 加载 SKILL.md 后按守则操作：
 
@@ -85,7 +85,3 @@ npx skills update -g -y
 - **平台版本号** 由我们维护，跟 skill 自身 frontmatter version 解耦；改了 monorepo 哪个 skill 就把 skill.md 那一行 +1
 
 ---
-
-## 许可
-
-© Wind AIMarket 2026

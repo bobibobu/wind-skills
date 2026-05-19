@@ -23,8 +23,8 @@ Using "<英文 Skill 名>" skill:<原 prompt>
 
 - `--skill` **同时支持中文名和英文名**，不是 id。例如下列写法等价：
   - `--skill "上市公司调研问题清单"` （中文 nameZh）
-  - `--skill "Stock DD List"`            （英文 nameEn）
-  - `--skill "stock-dd-list"`            （英文模糊：忽略大小写/空格/`-_`）
+  - `--skill "Stock DD List"` （英文 nameEn）
+  - `--skill "stock-dd-list"` （英文模糊：忽略大小写/空格/`-_`）
 - 命中后 CLI **统一回填英文名**拼入文本前缀（服务端按英文识别 Skill）。
 - 未在 `KNOWN_SKILLS` 中登记的名称会以 `[warn]` 提示，但仍按字面值拼接前缀提交（portal 上新建/改名的 Skill 也能立刻使用）。
 
@@ -94,12 +94,12 @@ CLI 在每次调用结束时会自动扫描 value 中的可下载文件链接，
 ```text
 下载方式：HTTP GET，请求头携带 Bearer Token
   Authorization: Bearer <WIND_API_KEY>
-  (WIND_API_KEY 为万得 AI Market 提供的 apiKey)
+  (WIND_API_KEY 为万得 Wind AIFin Market 提供的 apiKey)
 ```
 
 **重要事实**：
 
-1. 文件接口与 Agent 接口 **共用同一份 `WIND_API_KEY`**（即万得 AI Market 提供的 apiKey），浏览器外的 GET 必须自带 `Authorization: Bearer <WIND_API_KEY>`，否则 401/403。
+1. 文件接口与 Agent 接口 **共用同一份 `WIND_API_KEY`**（即 Wind AIFin Market 提供的 apiKey），浏览器外的 GET 必须自带 `Authorization: Bearer <WIND_API_KEY>`，否则 401/403。
 2. CLI **不会把 Key 打印到日志**，只展示鉴权头格式。
 3. 该提示打到 **stderr**，不会污染 stdout 的 `agentResult.value` 主体。
 
@@ -116,7 +116,6 @@ CLI 在每次调用结束时会自动扫描 value 中的可下载文件链接，
 5. **流式必须等到结束**：CLI 已在父子进程间 `await` 子进程退出；切勿改成"发完即返"。
 6. **耗时预期与耐心提示**：调用前须提醒用户 Alice Skill 可能较慢；执行中不得因等待过久而中断 CLI、改走其它工具或并行重复调用同一任务。
 7. **不要凭空构造 `selectedSkillIds` / `agentCard` 之类的旧字段去指定 Skill** — 已实测不生效，必须走文本前缀。
-
 
 ## 更新提示处理
 
