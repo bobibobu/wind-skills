@@ -92,12 +92,18 @@ REPORT_HOUR = 8             # 每天该整点生成日报（本地时间）
 REPORT_WINDOW_HOURS = 24    # 日报统计窗口长度（小时）
 
 # 固定的成功样例：(展示名, server_type, tool_name, params)
-# 日期一律 yyyy-MM-dd（当前 CLI 归一层要求），过去的固定交易日，历史数据长期可查。
+# 入参以【生产仓 wind-mcp-skill 1.9.6】契约为准：
+#   - 日期一律 yyyyMMdd（生产仓无 yyyy-MM-dd 归一层，date_keys 用 yyyyMMdd）
+#   - 用过去的固定交易日，历史数据长期可查
+# 说明：get_stock_price_indicators 即用户口述的 get_stock_indicators（清单里的真名）。
+# 注意：natural_language_get_edb_data 在生产仓 1.9.6 上，CLI 解析 EDB 响应有已知 bug
+#       （后端返回 "OK" 被误判为 UNKNOWN；inspector 直连与更高版本 CLI 均正常），
+#       任何入参都无法在 1.9.6 上返回成功——保留它是为了持续监控该链路，待生产仓升级即恢复。
 SAMPLES = [
     ("get_stock_quote", "stock_data", "get_stock_quote",
-     {"windcode": "600519.SH", "begin": "2026-07-24", "end": "2026-07-24"}),
+     {"windcode": "600519.SH", "begin": "20260724", "end": "20260724"}),
     ("get_stock_kline", "stock_data", "get_stock_kline",
-     {"windcode": "600519.SH", "begin_date": "2026-07-01", "end_date": "2026-07-24"}),
+     {"windcode": "600519.SH", "begin_date": "20260701", "end_date": "20260724"}),
     ("get_stock_price_indicators", "stock_data", "get_stock_price_indicators",
      {"windcode": "600519.SH", "indexes": "中文简称,最新成交价,涨跌幅"}),
     ("get_financial_data", "analytics_data", "get_financial_data",
