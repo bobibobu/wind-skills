@@ -55,15 +55,29 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 def _resolve_skill_dir() -> Path:
-    """定位含 cli.mjs 的 skill 目录。优先环境变量，其次仓库内相对路径，最后兜底绝对路径。"""
+    """定位含 cli.mjs 的 skill 目录。
+
+    顺序：
+      1. 环境变量 WIND_SKILL_DIR（最高优先级，可指向生产仓等任意路径）
+      2. 与本脚本同级的 wind-mcp-skill/          （脚本和 skill 放同一目录时）
+      3. <脚本上级>/skills/wind-mcp-skill        （脚本在 <repo>/monitoring/ 时）
+      4. <脚本上级>/wind-mcp-skill               （脚本在某子目录、skill 在其上级同级）
+      5. 兜底绝对路径
+    取第一个存在 scripts/cli.mjs 的目录。
+    """
     env = os.environ.get("WIND_SKILL_DIR")
     if env:
         return Path(env)
-    # 本脚本提交在 <repo>/monitoring/ 下，skill 在 <repo>/skills/wind-mcp-skill
-    candidate = SCRIPT_DIR.parent / "skills" / "wind-mcp-skill"
-    if (candidate / "scripts" / "cli.mjs").exists():
-        return candidate
-    return Path("/home/wind/ybyu/wind-skills/skills/wind-mcp-skill")
+    candidates = [
+        SCRIPT_DIR / "wind-mcp-skill",
+        SCRIPT_DIR.parent / "skills" / "wind-mcp-skill",
+        SCRIPT_DIR.parent / "wind-mcp-skill",
+        Path("/home/wind/ybyu/wind-skills/skills/wind-mcp-skill"),
+    ]
+    for cand in candidates:
+        if (cand / "scripts" / "cli.mjs").exists():
+            return cand
+    return candidates[-1]
 
 
 SKILL_DIR = _resolve_skill_dir()
