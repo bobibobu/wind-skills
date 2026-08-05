@@ -380,6 +380,8 @@ skills/wind-mcp-skill/
 ├── SKILL.md                    L2：路由 + Quick start + 每次必守门禁 + 导航 + 完成状态
 │                                   （门禁 9 与「不得切 analytics/alice」永远留在这里）
 ├── README.md                   面向人：能力 / 安装 / Key / 版本 / 限制          ← A6
+├── skill-standard-and-layering-plan.md   ← 本文档。SKILL.md 不引用它，
+│                                            因此不进 agent 上下文；仅供维护者阅读
 ├── references/
 │   ├── stock.md  fund.md  index.md  bond.md
 │   ├── financial-docs.md  economic.md  analytics.md                        ← 原样不动
