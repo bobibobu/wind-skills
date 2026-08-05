@@ -131,6 +131,7 @@ allowed-tools: <可选，收敛权限面>
 | **F11** | **Frontmatter 4 个非标准字段**（`auto_invoke` / `security` / `author` / `homepage` / `examples`）。`security:` 读起来像权限边界但在 Claude Code 侧不生效 | **未验证**（不知道 `npx skills add` / aifinmarket 门户是否消费，严重性无法判断） |
 | **F12** | **契约表「默认值」列混装两种语义**。必填参数（如 `question`）那一格实为**示例**，选填参数（`lang` / `period` / `aftype` / `issusp` / `indexes`）那一格是**真默认值**。必填参数给"默认值"本身语义矛盾，模型可能当成"不填时的取值"照传（→ 变成查宁德时代） | **硬**（表格可验证 + `cli.mjs:1422` 渲染逻辑） |
 | **F13** | **路由信息错位在参数格里**。各工具的【不要选用本工具的场景 → 改用 X】只存在于 `question` 的参数说明中；工具级描述只有覆盖范围，**没有交叉引用**。路由本该由工具描述承担 | **硬**（stock.md:29 与参数格可直接比对） |
+| **F14** | **命令转义指引只覆盖 POSIX**。`powershell` / `pwsh` / `windows` / `cmd.exe` / `codex` / `workbuddy` 在 SKILL.md 与整个 `references/` 中**零命中**；工作流第 7 步只给单引号形态，PowerShell 下双引号会被吞。门禁 6 的触发词「执行器**重复转义**」太窄——PowerShell 症状是双引号丢失、包装执行器症状是反斜杠被吃，agent 未必对得上 | **硬**（全文检索 + SKILL.md:53/79 可验证） |
 
 ---
 
@@ -293,8 +294,26 @@ agent 容易过度锚定示例里的 `indexes` 值，照抄到不相关查询上
 | **A7** | `cli.mjs` 的 `CALL_EXAMPLES` 处加注释指向 SKILL.md Quick start（接受双份，标明需同步） | 4.6 | `cli.mjs` | 5 分钟 |
 | **A8** | **契约表按 `required` 分别渲染该列**：必填 → `示例：xxx`；选填 → `默认 xxx`。单元格内加前缀即可，不改表结构 | F12 | `cli.mjs:1422` | 半小时 |
 | **A9** | **参数说明与工具描述分工**：路由（【不要选用 → 改用 X】）上移到 `${tool.description}`；`question` 参数说明只留构造规则 + 该参数特有硬约束（窗口档位、单位 ‰、不支持清单） | F13 / F9 | `cli.mjs` | 半天 |
+| **A10** | **门禁 6 的触发条件从「识别症状」改成「识别环境」**（见下） | F14 | `SKILL.md` | 20 分钟 |
 
 **A 档合计约一天，不改变任何运行时行为，不押注任何未验证假设。**
+
+### A10 门禁 6 建议措辞
+
+现状写的是「执行器**重复转义** JSON 时」改用 `@file`——要求 agent 先撞墙、再把自己遇到的现象对上这四个字。
+改成按环境判断，判断成本低得多：
+
+> **非 POSIX shell（PowerShell / cmd / 经 workbuddy、Codex 等执行器包装）一律直接用
+> `@scripts/request-<唯一后缀>.json`，不要先试内联。**
+> 文件必须 UTF-8：PowerShell 用 `Set-Content -Encoding utf8`，**不要用 `>`**。
+> 症状包括双引号丢失、反斜杠被吞、JSON 被二次转义——出现任一种直接换 `@file`，不要反复改引号。
+
+**为什么要单独点名编码**：PowerShell 5.1 的 `>` 默认写 UTF-16LE。`loadParamsInput`（`cli.mjs:266`）
+只剥 BOM，救不了 UTF-16。届时 `readFileSync(...,'utf8')` 读出乱码 → `INVALID_PARAMS_JSON` →
+`agent_action`（`cli.mjs:340`）指示「修 shell 引号 / JSON 转义」→ **agent 会一直改引号，而真正的问题是编码**。
+这是一条会真实发生的死循环，且现有错误信封无法自我纠正。
+
+不需要为此新建 `references/escaping.md`——一段门禁措辞即可覆盖，新建文件反而多一层跳转。
 
 ### A8 / A9 的落地方式（重要）
 
