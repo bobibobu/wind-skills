@@ -85,8 +85,8 @@
 | 参数 | 必填 | 类型 | 枚举 | 示例 / 默认 | 官方说明 |
 | --- | --- | --- | --- | --- | --- |
 | `windcode` | 是 | string | — | — | 股票名称或者股票代码，如贵州茅台或600519.SH。 |
-| `begin_date` | 是 | string | — | — | 查询开始日期，格式 yyyy-MM-dd。 |
-| `end_date` | 是 | string | — | — | 查询结束日期，格式 yyyy-MM-dd。 |
+| `begin` | 是 | string | — | — | 查询开始日期，格式 yyyy-MM-dd。 |
+| `end` | 是 | string | — | — | 查询结束日期，格式 yyyy-MM-dd。 |
 
 ### `get_stock_technicals`
 

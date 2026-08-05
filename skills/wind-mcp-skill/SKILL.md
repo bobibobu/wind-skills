@@ -86,7 +86,7 @@ node scripts/cli.mjs call stock_data get_stock_price_indicators '{"windcode":"60
 
 **成功（exit 0）**：stdout 是结构化数据，直接读；若存在 `content[0].text`，优先解析其中的文本或 JSON。
 
-- 数值按 `cli_meta.units` 声明的单位和**量级**解释；未声明的保留原值并说明单位未知。
+- 数值的单位和**量级**以返回体自带的元数据为准：行情类在 `data.unit`，列定义中可能带 `unit`，EDB 在 `meta.unit` 与 `meta.magnitude`。元数据未给出时保留原值并说明单位未知，不得自行换算。
 - `null` 表示缺失或不适用，禁止当作 0（`INVALID` 已由执行器转为 `null`）。
 - 只报告实际返回的行数，返回多个数据块时逐块报告。后端不提供总数，不得依据 `excelTotalCount` 推断完整性、排名全集或分页状态。
 - `cli_meta.warnings` 非空时保留数据并说明警告内容；`UNKNOWN_BACKEND_STATUS_WITH_DATA` 或 `BACKEND_ERROR_WITH_DATA` 按部分成功处理，不得丢弃已返回数据。

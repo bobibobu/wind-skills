@@ -68,8 +68,8 @@
 | 参数 | 必填 | 类型 | 枚举 | 示例 / 默认 | 官方说明 |
 | --- | --- | --- | --- | --- | --- |
 | `windcode` | 是 | string | — | — | 基金名称或者基金代码，如588200.SH。|
-| `begin_date` | 是 | string | — | — | 查询开始日期，格式 yyyy-MM-dd。|
-| `end_date` | 是 | string | — | — | 查询结束日期，格式 yyyy-MM-dd。|
+| `begin` | 是 | string | — | — | 查询开始日期，格式 yyyy-MM-dd。|
+| `end` | 是 | string | — | — | 查询结束日期，格式 yyyy-MM-dd。|
 
 ### `get_fund_info`
 
