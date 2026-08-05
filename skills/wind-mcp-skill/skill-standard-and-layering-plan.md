@@ -495,7 +495,7 @@ skills/wind-mcp-skill/
 | CALL_EXAMPLES 示例修复（审计②发现） | `cli.mjs` | `get_stock_quote` 示例补必填 begin/end，原示例执行必中 `PARAM_VALIDATION_ERROR` |
 | A8 契约表「默认值」列区分示例与默认 | `references/*.md` | 必填参数标注「样例：」，选填参数标注「默认值：」；前缀措辞以用户终稿为准 |
 | A10 门禁 6 环境化（F14） | `SKILL.md` | 命令门禁改为按环境判断：非 POSIX（PowerShell / cmd / 包装执行器）一律 @file |
-| SKILL.md 精简（用户要求） | `SKILL.md` | 门禁 10 条 → 6 条：删统一格式（日期/question 格式由契约表 + call-rules 兜底，实测坏日期仍被本地拦截为 `INVALID_PARAM_VALUE`）、标的、indexes 独立条；重试前审计 7 条 → 4 条；并发/探针段压缩；126 → 114 行 |
+| SKILL.md 精简（用户要求，两轮） | `SKILL.md` | 第一轮：门禁 10 条 → 6 条（删统一格式/标的/indexes 独立条，实测坏日期仍被本地拦截为 `INVALID_PARAM_VALUE`），重试前审计 7 条 → 4 条。第二轮：门禁 6 条 → 4 条（参数条并入门禁 1，行情解释条删除；Quote 不含昨收/日涨跌幅作为事实边界写入三个 Quote 工具契约，单位规则并入结果安全）；路由优先级 8 条 → 3 条撞车规则（公告优先、宏观序列、筛选归属，其余由导航表 + 契约覆盖）；114 → 约 105 行 |
 
 > 实测佐证：运行验证中 PowerShell 直接吞掉内联 JSON 的双引号（命中 `INVALID_PARAMS_JSON`），被迫改走 `@file`——F14 / A10 从「文档分析」升级为「已实证」。另注意：A9 的「跨工具指引上移到工具描述」与用户约束「工具说明中禁止出现跨工具指引（避免改一个工具牵多处）」冲突，待用户决策后再定去留。
 
