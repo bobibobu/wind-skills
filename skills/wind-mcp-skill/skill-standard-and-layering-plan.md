@@ -1,6 +1,6 @@
 # wind-mcp-skill：对标优秀开源 Skill 的评估与分层改造方案
 
-> 状态：**方案 v2（含自评修订，未落地任何修改）**
+> 状态：**方案 v2（含自评修订）；2026-08-05 更新：A 档部分落地、两项审计完成、运行实测挖出两个真实缺口，落地记录见 §9**
 > 评估对象：`skills/wind-mcp-skill`（SKILL.md 125 行 / cli.mjs v1.11.11 / 7 个领域契约）
 > 参照系：Anthropic 官方 Agent Skills 规范、Anthropic `skill-creator`、`obra/superpowers`、`garrytan/gstack`
 >
@@ -283,18 +283,20 @@ agent 容易过度锚定示例里的 `indexes` 值，照抄到不相关查询上
 
 ### A 档：立即执行 —— 零假设、有硬证据、低风险
 
+> 状态标记（2026-08-05 更新）：✅ 已完成 / ⏸ 搁置 / ⏳ 未开始 / ❌ 否决，明细见 §9。
+
 | # | 动作 | 对应问题 | 涉及文件 | 预估 |
 | --- | --- | --- | --- | --- |
-| **A1** | SKILL.md 顶部加 **Quick start**：一个填好的完整调用（命令 + 参数 + 输出片段 + `cli_meta` 形状），**紧跟一行"字段逐字取自领域契约，勿照抄本例"** | F1 | `SKILL.md` | 20 行 / 30 分钟 |
-| **A2** | 对齐仓库版与安装版 `description`，并补口语触发词（最新价 / K线 / 选股 / 净值 / 规模 / 持仓 / 公告 / PE / 市值 / 涨跌幅） | F2 | `SKILL.md` | 20 分钟 |
-| **A3** | 门禁 8 压缩为一行「结果安全语义以 `cli_meta.warnings` 为准，逐条体现」，删除与 CLI 注入重复的散文 | F3 | `SKILL.md` | 10 分钟 |
-| **A4** | 去掉 `cd` 依赖，改为「用 skill 目录绝对路径执行，无需 cd」 | F4 | `SKILL.md` | 5 分钟 |
-| **A5** | 术语统一（「领域契约」作为唯一说法；「价格指标工具」与「行情工具」分清） | F7 | `SKILL.md` + references | 20 分钟 |
-| **A6** | 新增 skill 目录 `README.md`（能力、安装、Key 申请、版本、已知限制） | F6 | 新增 | 1 小时 |
-| **A7** | `cli.mjs` 的 `CALL_EXAMPLES` 处加注释指向 SKILL.md Quick start（接受双份，标明需同步） | 4.6 | `cli.mjs` | 5 分钟 |
-| **A8** | **契约表按 `required` 分别渲染该列**：必填 → `示例：xxx`；选填 → `默认 xxx`。单元格内加前缀即可，不改表结构 | F12 | `cli.mjs:1422` | 半小时 |
-| **A9** | **参数说明与工具描述分工**：路由（【不要选用 → 改用 X】）上移到 `${tool.description}`；`question` 参数说明只留构造规则 + 该参数特有硬约束（窗口档位、单位 ‰、不支持清单） | F13 / F9 | `cli.mjs` | 半天 |
-| **A10** | **门禁 6 的触发条件从「识别症状」改成「识别环境」**（见下） | F14 | `SKILL.md` | 20 分钟 |
+| **A1** ⏸ | SKILL.md 顶部加 **Quick start**：一个填好的完整调用（命令 + 参数 + 输出片段 + `cli_meta` 形状），**紧跟一行"字段逐字取自领域契约，勿照抄本例"** | F1 | `SKILL.md` | 20 行 / 30 分钟 |
+| **A2** ✅ | 对齐仓库版与安装版 `description`，并补口语触发词（最新价 / K线 / 选股 / 净值 / 规模 / 持仓 / 公告 / PE / 市值 / 涨跌幅） | F2 | `SKILL.md` | 20 分钟 |
+| **A3** ✅ | 门禁 8 压缩为一行「结果安全语义以 `cli_meta.warnings` 为准，逐条体现」，删除与 CLI 注入重复的散文 | F3 | `SKILL.md` | 10 分钟 |
+| **A4** ❌ | 去掉 `cd` 依赖，改为「用 skill 目录绝对路径执行，无需 cd」 | F4 | `SKILL.md` | 5 分钟 |
+| **A5** ✅ | 术语统一（「领域契约」作为唯一说法；「价格指标工具」与「行情工具」分清） | F7 | `SKILL.md` + references | 20 分钟 |
+| **A6** ⏳ | 新增 skill 目录 `README.md`（能力、安装、Key 申请、版本、已知限制） | F6 | 新增 | 1 小时 |
+| **A7** ❌ | `cli.mjs` 的 `CALL_EXAMPLES` 处加注释指向 SKILL.md Quick start（接受双份，标明需同步） | 4.6 | `cli.mjs` | 5 分钟 |
+| **A8** ✅ | **契约表按 `required` 分别渲染该列**：必填 → `示例：xxx`；选填 → `默认 xxx`。单元格内加前缀即可，不改表结构 | F12 | `cli.mjs:1422` | 半小时 |
+| **A9** ⚠️ | **参数说明与工具描述分工**：路由（【不要选用 → 改用 X】）上移到 `${tool.description}`；`question` 参数说明只留构造规则 + 该参数特有硬约束（窗口档位、单位 ‰、不支持清单） | F13 / F9 | `cli.mjs` | 半天 |
+| **A10** ✅ | **门禁 6 的触发条件从「识别症状」改成「识别环境」**（见下） | F14 | `SKILL.md` | 20 分钟 |
 
 **A 档合计约一天，不改变任何运行时行为，不押注任何未验证假设。**
 
@@ -333,10 +335,10 @@ agent 容易过度锚定示例里的 `indexes` 值，照抄到不相关查询上
 
 | # | 动作 | **前置审计（必须先做）** | 若审计不通过 |
 | --- | --- | --- | --- |
-| **B1** | 抽出 `references/recovery.md`（重试审计 + 熔断 + wind-alice 兜底 4 步），L2 留一行指针 | 逐个错误码核对 `ERROR_DEFINITIONS[*].agent_action` 是否已覆盖「重试前审计」6 条。**只有已覆盖的才允许从 L2 移走**；「不得切 analytics / alice」这类反合理化规则**无论如何留在 L2** | 不拆，只在 L2 内压缩措辞 |
-| **B2** | L4 扩大化：Quote 缺 `pre_close`/`pct_chg` 时注入 `MISSING_PRE_CLOSE`；单位缺失时注入 `UNIT_UNKNOWN` | 用 `tests/mock-fetch.mjs` 造 scenario 确认字段缺失的判定条件；**同时确认 warnings 在大结果集里是否真被读到**（否则先把 warnings 提到 `cli_meta` 之前或输出到 stderr） | 只做 stderr 提示，不动 payload |
-| **B3** | 把 warnings 从 payload 尾部提前（或复制一份到 stderr），解决 §3.2「不是不可忽略」 | 确认 stderr 不会污染 agent 对 exit 0 的判定 | 保持现状 |
-| **B4** | 门禁重排 + Common mistakes 表（`症状 \| 借口 \| 正确做法`） | **需要 D 档评测给出基线**，证明当前门禁形式确实存在遵守率问题 | 不做；现有散文已能表达 |
+| **B1** ❌ | 抽出 `references/recovery.md`（重试审计 + 熔断 + wind-alice 兜底 4 步），L2 留一行指针 | 逐个错误码核对 `ERROR_DEFINITIONS[*].agent_action` 是否已覆盖「重试前审计」6 条。**只有已覆盖的才允许从 L2 移走**；「不得切 analytics / alice」这类反合理化规则**无论如何留在 L2** | 不拆，只在 L2 内压缩措辞 |
+| **B2** ⏳ | L4 扩大化：Quote 缺 `pre_close`/`pct_chg` 时注入 `MISSING_PRE_CLOSE`；单位缺失时注入 `UNIT_UNKNOWN` | 用 `tests/mock-fetch.mjs` 造 scenario 确认字段缺失的判定条件；**同时确认 warnings 在大结果集里是否真被读到**（否则先把 warnings 提到 `cli_meta` 之前或输出到 stderr） | 只做 stderr 提示，不动 payload |
+| **B3** ⏳ | 把 warnings 从 payload 尾部提前（或复制一份到 stderr），解决 §3.2「不是不可忽略」 | 确认 stderr 不会污染 agent 对 exit 0 的判定 | 保持现状 |
+| **B4** ⏳ | 门禁重排 + Common mistakes 表（`症状 \| 借口 \| 正确做法`） | **需要 D 档评测给出基线**，证明当前门禁形式确实存在遵守率问题 | 不做；现有散文已能表达 |
 
 **B 档共同前提：门禁 9（Quote 涨跌幅）留在 L2，不下沉。**
 
@@ -376,7 +378,9 @@ agent 容易过度锚定示例里的 `indexes` 值，照抄到不相关查询上
 
 ### 6.1 A 阶段落地版（只做 A 档后的样子）
 
-结构基本不变，**不拆 recovery.md**，重点是补示例、删重复、去 `cd`。
+结构基本不变，**不拆 recovery.md**，重点是补示例、删重复。
+
+> 注（2026-08-05）：本节为起草时草图，两处已被落地版取代——① description 已改为中文句式，且「汇率」排除经实测删除（EDB 可查美元兑人民币等汇率指标 G0002329，见 §9.1）；② A4 去 cd 已否决，保留 cd + 相对路径。
 
 ```markdown
 ---
@@ -385,7 +389,7 @@ description: >-
   访问万得 Wind 金融数据。Use when 用户问 A股/港股/美股的最新价、涨跌幅、K线、分钟行情、
   财务、估值、股东、事件、风险；基金/ETF/LOF 的净值、规模、持仓、业绩；指数/板块行情与
   基本面；债券档案与估值；上市公司公告、财经新闻、宏观与行业指标；或需要选股/选基筛选。
-  Not for 台股、日股、韩股、欧股、汇率、期货盘口、加密货币或非金融数据。
+  Not for 台股、日股、韩股、欧股、期货盘口、加密货币或非金融数据。
 ---
 
 # Wind 万得金融数据
@@ -459,11 +463,11 @@ skills/wind-mcp-skill/
 ## 8. 执行顺序
 
 ```
-第 1 步  A 档全做（半天，零风险，不需要任何前置）
+第 1 步  A 档全做（半天，零风险，不需要任何前置）                    ← ✅ 部分完成（见 §9.1）
          ↓
-第 2 步  两项审计（各半天，纯阅读，不改代码）
-         审计① 逐个错误码核对 agent_action 覆盖度        → 决定 B1
-         审计② SKILL.md 声明 vs cli.mjs 实际行为一致性     → 可能挖出真 bug，优先级或高于全部 B 档
+第 2 步  两项审计（各半天，纯阅读，不改代码）                      ← ✅ 均已完成
+         审计① 逐个错误码核对 agent_action 覆盖度        → 决定 B1   ← ✅ 结论：B1 否决
+         审计② SKILL.md 声明 vs cli.mjs 实际行为一致性     → 可能挖出真 bug，优先级或高于全部 B 档   ← ✅ 静态核对 + 运行实测，挖出缺口 G1–G4（见 §9.3）
          ↓
 第 3 步  D 档第一轮（3 用例 / mock / 单模型，含 WIND_MOCK 前置工程，1–2 天）
          ↓
@@ -475,3 +479,57 @@ skills/wind-mcp-skill/
 ```
 
 **核心原则：A 档之后的每一步都必须有前一步的结论支撑，不要因为方案写得完整就把它全做完。**
+
+---
+
+## 9. 落地进度记录（2026-08-05 更新）
+
+### 9.1 已完成的修改
+
+| 修改 | 文件 | 说明 |
+| --- | --- | --- |
+| A2 description 对齐 | `SKILL.md` | 补口语触发词；终版为中文句式（用户调整）；「汇率」排除曾加入后又经实测删除——EDB 实际可查美元兑人民币等汇率指标，整体排除会误拦合法请求 |
+| A3 门禁 8 压缩 | `SKILL.md` | 保守压缩：删与执行器重复的 INVALID 表述（CLI 已转 null），保留 null 语义 / excelTotalCount / 多数据块 / warnings 逐条体现 |
+| A5 术语统一 | `SKILL.md` | 导航头「必读契约」→「领域契约」；路由优先级 6「行情工具」→「价格指标、Quote 或 K 线工具」 |
+| lang 入参移除（计划外，用户确认） | `SKILL.md` / `request.example.json` | 门禁 3 删 lang 分句；示例文件删 lang；CLI 防御性归一化逻辑保留 |
+| CALL_EXAMPLES 示例修复（审计②发现） | `cli.mjs` | `get_stock_quote` 示例补必填 begin/end，原示例执行必中 `PARAM_VALIDATION_ERROR` |
+| A8 契约表「默认值」列区分示例与默认 | `references/*.md` | 必填参数标注「样例：」，选填参数标注「默认值：」；前缀措辞以用户终稿为准 |
+| A10 门禁 6 环境化（F14） | `SKILL.md` | 命令门禁改为按环境判断：非 POSIX（PowerShell / cmd / 包装执行器）一律 @file |
+| SKILL.md 精简（用户要求） | `SKILL.md` | 门禁 10 条 → 6 条：删统一格式（日期/question 格式由契约表 + call-rules 兜底，实测坏日期仍被本地拦截为 `INVALID_PARAM_VALUE`）、标的、indexes 独立条；重试前审计 7 条 → 4 条；并发/探针段压缩；126 → 114 行 |
+
+> 实测佐证：运行验证中 PowerShell 直接吞掉内联 JSON 的双引号（命中 `INVALID_PARAMS_JSON`），被迫改走 `@file`——F14 / A10 从「文档分析」升级为「已实证」。另注意：A9 的「跨工具指引上移到工具描述」与用户约束「工具说明中禁止出现跨工具指引（避免改一个工具牵多处）」冲突，待用户决策后再定去留。
+
+### 9.2 审计结论
+
+- **审计①（agent_action 覆盖度）**：22 个错误码中 15 个有显式「保持 server_type / tool_name」表述；每个可修正错误码都精确限定可改字段；PARAM_CONFLICT_ERROR 完全覆盖。→ **B1 否决：不拆 recovery.md**，「重试前审计」保留在 L2（约 200 tokens，拆出的收益小于风险）。
+- **审计②（声明 vs 行为）**：静态核对全部一致，但 §4.9 预警的「一次 CLI 都没跑过」风险成真——运行实测推翻了静态结论，挖出 G1–G4。
+
+### 9.3 运行实测挖出的缺口（真实后端探针，可复现）
+
+| # | 缺口 | 严重度 |
+| --- | --- | --- |
+| G1 | `search_stocks` 无匹配时返回**纯文本**「没找到数据」，CLI 以 exit 0 透传，无 `NO_RESULTS` 信封、无 warning | 高（两个独立条件各复现一次） |
+| G2 | 节假日 Quote 返回空 `rows:[]`，exit 0，仅有 `actual_row_count: 0`，无任何警告 | 中 |
+| G3 | EDB 1003 中「question 必须是指标代码」类参数用法错误被映射为 `EDB_INDICATOR_NOT_FOUND`，语义偏差 | 低 |
+| G4 | 开发机环境变量 `NODE_TLS_REJECT_UNAUTHORIZED=0`（非 cli.mjs 所为），TLS 校验被全局关闭 | 另行排查 |
+
+根因：`isExplicitNoDataResult` 只认 `{data:null, error:{code:'QUERY_FAILED', message:'没找到数据'}}` 一种 JSON 形态；`NO_RESULTS` 匹配正则不含「没找到数据」措辞。
+
+### 9.4 待执行修复方案（G1 / G2，均在 cli.mjs）
+
+1. `mcpRequest` 二次解析处识别无数据裸文本（没找到数据 / 未找到数据 / 未获取到数据 / no data）→ `die('NO_RESULTS')`；
+2. `isExplicitNoDataResult` 命中时转 `NO_RESULTS` 信封，不再静默透传（exit 0 → 1 是有意修正，与 SKILL.md 完成状态语义一致）；
+3. `ERROR_PATTERNS` 的 `NO_RESULTS` 正则补 `没找到数据|未找到数据`；
+4. `normalizeCallSuccess` 中 `actual_row_count === 0` 时追加 `EMPTY_RESULT_SET` 警告（不阻断成功路径）。
+
+### 9.5 优先级更新（基于以上证据）
+
+1. **G1 / G2 修复**——强证据、改动小、直接减少 agent 误判，属 B2 类「运行时语义加固」的首个有实证落地项（未实施，用户要求暂缓 cli.mjs）；
+2. ~~**A10 门禁 6 环境化（F14）**~~ ✅ 已完成；
+3. ~~**A8 契约表「示例/默认」前缀（F12）**~~ ✅ 已完成（仅手维护契约；生成器侧待 sync 时同步）；
+4. A6 README（含 `config.json` Key 配置说明）；
+5. D 档第一轮评测（3 个路由用例 + WIND_MOCK 前置工程）；
+6. F11 frontmatter 非标准字段外部验证 → 决定 C2；
+7. 提交与发布（否则仓库版与安装版仍不一致，A2 的收益到不了用户）。
+
+待决策：**A9** 与用户「工具说明禁跨工具指引」约束冲突，暂缓。
