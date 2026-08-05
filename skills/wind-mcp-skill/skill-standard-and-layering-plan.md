@@ -496,6 +496,8 @@ skills/wind-mcp-skill/
 | A8 契约表「默认值」列区分示例与默认 | `references/*.md` | 必填参数标注「样例：」，选填参数标注「默认值：」；前缀措辞以用户终稿为准 |
 | A10 门禁 6 环境化（F14） | `SKILL.md` | 命令门禁改为按环境判断：非 POSIX（PowerShell / cmd / 包装执行器）一律 @file |
 | SKILL.md 精简（用户要求，两轮） | `SKILL.md` | 第一轮：门禁 10 条 → 6 条（删统一格式/标的/indexes 独立条，实测坏日期仍被本地拦截为 `INVALID_PARAM_VALUE`），重试前审计 7 条 → 4 条。第二轮：门禁 6 条 → 4 条（参数条并入门禁 1，行情解释条删除；Quote 不含昨收/日涨跌幅作为事实边界写入三个 Quote 工具契约，单位规则并入结果安全）；路由优先级 8 条 → 3 条撞车规则（公告优先、宏观序列、筛选归属，其余由导航表 + 契约覆盖）；114 → 约 105 行 |
+| SKILL.md 换用 draft 四步结构（用户决策） | `SKILL.md`、`SKILL.backup.md` | 以用户新写的 `SKILL.draft.md`（①定路由→②发命令→③读回执→④收口）为底版，回填三处：结果安全（null≠0、excelTotalCount、部分成功码、多 Step）并入「读回执」；收口不提 wind-alice 外置引用（draft 引用的 `references/alice-handoff.md` 不存在），失败路径沿用现版描述；@file 保留非 POSIX 主动规则。旧版备份为 `SKILL.backup.md`，draft 本体已删 |
+| 行情指标集拆分独立文件（用户决策） | `references/{stock,fund,index}-indicators.md`、三个领域契约 | 三个 `*_indicator.md`（用户新写，含实测验证声明与使用说明）移入 references/ 改连字符命名；stock/fund/index.md 删除内嵌 `DOMAIN INDICATORS` 块，头部 bullet、目录、`indexes` 参数行改指向新文件并声明懒加载（未指定字段省略 `indexes` 走默认值）。生成器只管理 `GENERATED CONTRACT` 块，指标块纯手工，拆分不影响 sync-contracts |
 
 > 实测佐证：运行验证中 PowerShell 直接吞掉内联 JSON 的双引号（命中 `INVALID_PARAMS_JSON`），被迫改走 `@file`——F14 / A10 从「文档分析」升级为「已实证」。另注意：A9 的「跨工具指引上移到工具描述」与用户约束「工具说明中禁止出现跨工具指引（避免改一个工具牵多处）」冲突，待用户决策后再定去留。
 
