@@ -1,5 +1,5 @@
 {
-  "schema_version": 13,
+  "schema_version": 14,
   "description": "Runtime normalization and validation rules for Wind MCP tool calls.",
   "kline_period_map": {
     "1min": "1",
@@ -113,8 +113,7 @@
       "name": "quote",
       "label": "分钟行情",
       "tools": ["get_stock_quote", "get_fund_quote", "get_index_quote"],
-      "required": ["windcode", "begin", "end"],
-      "paired": [["begin", "end"]],
+      "required": ["windcode"],
       "ordered_dates": [["begin", "end"]]
     },
     {
