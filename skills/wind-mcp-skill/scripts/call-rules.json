@@ -135,7 +135,7 @@
       "patterns": {
         "observation": {
           "pattern": "^\\d+$",
-          "message": "字段 'observation' 只能是数字字符串（近 N 期），不支持 'all'"
+          "message": "字段 'observation' 只能是数字字符串（近 N 期）"
         }
       },
       "required_one_of": [

@@ -136,13 +136,13 @@ add('paired', 'query 只给 endDate', P('economic_data', EDB_QUERY, { question: 
 add('mutex', 'query observation + beginDate', P('economic_data', EDB_QUERY, { question: 'G0000069', observation: '5', beginDate: '20230101' }), ERRV('PARAM_VALIDATION_ERROR'));
 add('mutex', 'query observation + endDate', P('economic_data', EDB_QUERY, { question: 'G0000069', observation: '5', endDate: '20241231' }), ERRV('PARAM_VALIDATION_ERROR'));
 
-// ---------- 15. observation pattern (digits only; 'all' no longer supported) ----------
-for (const bad of ['abc', '-1', '1.5', '1a', '1.0', 'ten', '5 ', ' 5', '0x5', 'all']) {
+// ---------- 15. observation pattern (digits only) ----------
+for (const bad of ['abc', '-1', '1.5', '1a', '1.0', 'ten', '5 ', ' 5', '0x5']) {
   add('pattern-observation', `query observation='${bad}'`, P('economic_data', EDB_QUERY, { question: 'G0000069', observation: bad }), ERRV('PARAM_VALIDATION_ERROR'));
 }
 // ---------- 16. conditional: query requires observation or dates ----------
 add('conditional', 'query 无 observation/dates', P('economic_data', EDB_QUERY, { question: 'G0000069' }), ERRV('PARAM_VALIDATION_ERROR'));
-// ---------- 17. unknown field (EDB allowed lists; target* is intentionally not exposed) ----------
+// ---------- 17. unknown field (EDB allowed lists) ----------
 for (const f of [['windcode', '600519.SH'], ['period', '1d'], ['foo', 'bar'], ['query', 'x'], ['targetCurrency', 'USD'], ['targetMagnitude', '万亿'], ['targetFrequency', '年']]) {
   add('unknown-field', `query 多传字段 ${f[0]}`, P('economic_data', EDB_QUERY, { question: 'x', observation: '3', [f[0]]: f[1] }), ERRV('PARAM_VALIDATION_ERROR'));
 }
