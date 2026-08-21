@@ -66,7 +66,8 @@ const CASES = [
   ['analytics_data', 'get_financial_data', { question: '查询中国A股市场过去一年的平均成交量' }, {}, 'PARAM_VALIDATION_ERROR'],
 ];
 const ECON_CASES = [
-  ['economic_data', 'natural_language_get_edb_data', { executionMode: '搜索并提数', question: '中国GDP现价当季值', observation: '6' }, { question: '中国GDP' }, 'PARAM_VALIDATION_ERROR'],
+  ['economic_data', 'search_economic_indicator', { question: '中国近三年GDP相关指标' }, {}, 'PARAM_VALIDATION_ERROR'],
+  ['economic_data', 'query_economic_indicator_data', { question: '中国GDP现价当季值', observation: '6' }, { question: '中国GDP' }, 'PARAM_VALIDATION_ERROR'],
 ];
 // meta routing / json — [name, argv, expectedCode]. wrong-tool uses a non-remappable tool.
 const META = [

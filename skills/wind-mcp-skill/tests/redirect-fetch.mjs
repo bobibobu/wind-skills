@@ -1,6 +1,6 @@
 // Preload for run-all-tools-tests.mjs: transparently redirect the skill's
 // economic_data calls to a "newtools" test server that hosts
-// economic_indicator_search / economic_indicator_data_query (which use a
+// search_economic_indicator / query_economic_indicator_data (which use a
 // wind.sessionid header instead of Bearer). Everything else in cli.mjs runs
 // unchanged, so this exercises the real pipeline end-to-end.
 //
