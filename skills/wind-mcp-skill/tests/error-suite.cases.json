@@ -1918,7 +1918,7 @@
    "call",
    "stock_data",
    "get_stock_quote",
-   "{\"begin\":\"2026-08-18\",\"end\":\"2026-08-18\"}"
+   "{\"tradingday\":\"2026-08-18\"}"
   ],
   "expect": {
    "ok": false,
@@ -1933,7 +1933,7 @@
    "call",
    "fund_data",
    "get_fund_quote",
-   "{\"begin\":\"2026-08-18\",\"end\":\"2026-08-18\"}"
+   "{\"tradingday\":\"2026-08-18\"}"
   ],
   "expect": {
    "ok": false,
@@ -1948,7 +1948,7 @@
    "call",
    "index_data",
    "get_index_quote",
-   "{\"begin\":\"2026-08-18\",\"end\":\"2026-08-18\"}"
+   "{\"tradingday\":\"2026-08-18\"}"
   ],
   "expect": {
    "ok": false,
@@ -2518,7 +2518,7 @@
    "call",
    "stock_data",
    "get_stock_quote",
-   "{\"windcode\":\"\",\"begin\":\"2026-08-18\",\"end\":\"2026-08-18\"}"
+   "{\"windcode\":\"\",\"tradingday\":\"2026-08-18\"}"
   ],
   "expect": {
    "ok": false,
@@ -2533,7 +2533,7 @@
    "call",
    "fund_data",
    "get_fund_quote",
-   "{\"windcode\":\"\",\"begin\":\"2026-08-18\",\"end\":\"2026-08-18\"}"
+   "{\"windcode\":\"\",\"tradingday\":\"2026-08-18\"}"
   ],
   "expect": {
    "ok": false,
@@ -2548,7 +2548,7 @@
    "call",
    "index_data",
    "get_index_quote",
-   "{\"windcode\":\"\",\"begin\":\"2026-08-18\",\"end\":\"2026-08-18\"}"
+   "{\"windcode\":\"\",\"tradingday\":\"2026-08-18\"}"
   ],
   "expect": {
    "ok": false,
@@ -5093,51 +5093,6 @@
  {
   "id": "date-order-341",
   "category": "date-order",
-  "angle": "get_stock_quote begin>end",
-  "argv": [
-   "call",
-   "stock_data",
-   "get_stock_quote",
-   "{\"windcode\":\"600519.SH\",\"begin\":\"2026-08-18\",\"end\":\"2026-08-03\"}"
-  ],
-  "expect": {
-   "ok": false,
-   "code": "PARAM_VALIDATION_ERROR"
-  }
- },
- {
-  "id": "date-order-342",
-  "category": "date-order",
-  "angle": "get_fund_quote begin>end",
-  "argv": [
-   "call",
-   "fund_data",
-   "get_fund_quote",
-   "{\"windcode\":\"510300.SH\",\"begin\":\"2026-08-18\",\"end\":\"2026-08-03\"}"
-  ],
-  "expect": {
-   "ok": false,
-   "code": "PARAM_VALIDATION_ERROR"
-  }
- },
- {
-  "id": "date-order-343",
-  "category": "date-order",
-  "angle": "get_index_quote begin>end",
-  "argv": [
-   "call",
-   "index_data",
-   "get_index_quote",
-   "{\"windcode\":\"000300.SH\",\"begin\":\"2026-08-18\",\"end\":\"2026-08-03\"}"
-  ],
-  "expect": {
-   "ok": false,
-   "code": "PARAM_VALIDATION_ERROR"
-  }
- },
- {
-  "id": "date-order-344",
-  "category": "date-order",
   "angle": "query beginDate>endDate",
   "argv": [
    "call",
@@ -5151,7 +5106,547 @@
   }
  },
  {
-  "id": "paired-345",
+  "id": "pattern-count-342",
+  "category": "pattern-count",
+  "angle": "get_stock_kline count='abc'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_kline",
+   "{\"windcode\":\"600519.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"abc\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-343",
+  "category": "pattern-count",
+  "angle": "get_stock_kline count='1.5'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_kline",
+   "{\"windcode\":\"600519.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"1.5\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-344",
+  "category": "pattern-count",
+  "angle": "get_stock_kline count='3.0'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_kline",
+   "{\"windcode\":\"600519.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"3.0\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-345",
+  "category": "pattern-count",
+  "angle": "get_stock_kline count='1a'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_kline",
+   "{\"windcode\":\"600519.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"1a\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-346",
+  "category": "pattern-count",
+  "angle": "get_stock_kline count='ten'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_kline",
+   "{\"windcode\":\"600519.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"ten\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-347",
+  "category": "pattern-count",
+  "angle": "get_stock_kline count='--3'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_kline",
+   "{\"windcode\":\"600519.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"--3\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-348",
+  "category": "pattern-count",
+  "angle": "get_fund_kline count='abc'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_kline",
+   "{\"windcode\":\"510300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"abc\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-349",
+  "category": "pattern-count",
+  "angle": "get_fund_kline count='1.5'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_kline",
+   "{\"windcode\":\"510300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"1.5\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-350",
+  "category": "pattern-count",
+  "angle": "get_fund_kline count='3.0'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_kline",
+   "{\"windcode\":\"510300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"3.0\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-351",
+  "category": "pattern-count",
+  "angle": "get_fund_kline count='1a'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_kline",
+   "{\"windcode\":\"510300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"1a\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-352",
+  "category": "pattern-count",
+  "angle": "get_fund_kline count='ten'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_kline",
+   "{\"windcode\":\"510300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"ten\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-353",
+  "category": "pattern-count",
+  "angle": "get_fund_kline count='--3'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_kline",
+   "{\"windcode\":\"510300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"--3\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-354",
+  "category": "pattern-count",
+  "angle": "get_index_kline count='abc'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_kline",
+   "{\"windcode\":\"000300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"abc\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-355",
+  "category": "pattern-count",
+  "angle": "get_index_kline count='1.5'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_kline",
+   "{\"windcode\":\"000300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"1.5\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-356",
+  "category": "pattern-count",
+  "angle": "get_index_kline count='3.0'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_kline",
+   "{\"windcode\":\"000300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"3.0\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-357",
+  "category": "pattern-count",
+  "angle": "get_index_kline count='1a'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_kline",
+   "{\"windcode\":\"000300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"1a\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-358",
+  "category": "pattern-count",
+  "angle": "get_index_kline count='ten'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_kline",
+   "{\"windcode\":\"000300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"ten\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-359",
+  "category": "pattern-count",
+  "angle": "get_index_kline count='--3'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_kline",
+   "{\"windcode\":\"000300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":\"--3\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-360",
+  "category": "pattern-count",
+  "angle": "get_stock_quote count='abc'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_quote",
+   "{\"windcode\":\"600519.SH\",\"count\":\"abc\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-361",
+  "category": "pattern-count",
+  "angle": "get_stock_quote count='1.5'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_quote",
+   "{\"windcode\":\"600519.SH\",\"count\":\"1.5\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-362",
+  "category": "pattern-count",
+  "angle": "get_stock_quote count='3.0'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_quote",
+   "{\"windcode\":\"600519.SH\",\"count\":\"3.0\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-363",
+  "category": "pattern-count",
+  "angle": "get_stock_quote count='1a'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_quote",
+   "{\"windcode\":\"600519.SH\",\"count\":\"1a\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-364",
+  "category": "pattern-count",
+  "angle": "get_stock_quote count='ten'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_quote",
+   "{\"windcode\":\"600519.SH\",\"count\":\"ten\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-365",
+  "category": "pattern-count",
+  "angle": "get_stock_quote count='--3'",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_quote",
+   "{\"windcode\":\"600519.SH\",\"count\":\"--3\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-366",
+  "category": "pattern-count",
+  "angle": "get_fund_quote count='abc'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_quote",
+   "{\"windcode\":\"510300.SH\",\"count\":\"abc\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-367",
+  "category": "pattern-count",
+  "angle": "get_fund_quote count='1.5'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_quote",
+   "{\"windcode\":\"510300.SH\",\"count\":\"1.5\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-368",
+  "category": "pattern-count",
+  "angle": "get_fund_quote count='3.0'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_quote",
+   "{\"windcode\":\"510300.SH\",\"count\":\"3.0\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-369",
+  "category": "pattern-count",
+  "angle": "get_fund_quote count='1a'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_quote",
+   "{\"windcode\":\"510300.SH\",\"count\":\"1a\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-370",
+  "category": "pattern-count",
+  "angle": "get_fund_quote count='ten'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_quote",
+   "{\"windcode\":\"510300.SH\",\"count\":\"ten\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-371",
+  "category": "pattern-count",
+  "angle": "get_fund_quote count='--3'",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_quote",
+   "{\"windcode\":\"510300.SH\",\"count\":\"--3\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-372",
+  "category": "pattern-count",
+  "angle": "get_index_quote count='abc'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_quote",
+   "{\"windcode\":\"000300.SH\",\"count\":\"abc\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-373",
+  "category": "pattern-count",
+  "angle": "get_index_quote count='1.5'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_quote",
+   "{\"windcode\":\"000300.SH\",\"count\":\"1.5\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-374",
+  "category": "pattern-count",
+  "angle": "get_index_quote count='3.0'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_quote",
+   "{\"windcode\":\"000300.SH\",\"count\":\"3.0\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-375",
+  "category": "pattern-count",
+  "angle": "get_index_quote count='1a'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_quote",
+   "{\"windcode\":\"000300.SH\",\"count\":\"1a\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-376",
+  "category": "pattern-count",
+  "angle": "get_index_quote count='ten'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_quote",
+   "{\"windcode\":\"000300.SH\",\"count\":\"ten\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "pattern-count-377",
+  "category": "pattern-count",
+  "angle": "get_index_quote count='--3'",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_quote",
+   "{\"windcode\":\"000300.SH\",\"count\":\"--3\"}"
+  ],
+  "expect": {
+   "ok": false,
+   "code": "PARAM_VALIDATION_ERROR"
+  }
+ },
+ {
+  "id": "paired-378",
   "category": "paired",
   "angle": "query 只给 beginDate",
   "argv": [
@@ -5166,7 +5661,7 @@
   }
  },
  {
-  "id": "paired-346",
+  "id": "paired-379",
   "category": "paired",
   "angle": "query 只给 endDate",
   "argv": [
@@ -5181,7 +5676,7 @@
   }
  },
  {
-  "id": "mutex-347",
+  "id": "mutex-380",
   "category": "mutex",
   "angle": "query observation + beginDate",
   "argv": [
@@ -5196,7 +5691,7 @@
   }
  },
  {
-  "id": "mutex-348",
+  "id": "mutex-381",
   "category": "mutex",
   "angle": "query observation + endDate",
   "argv": [
@@ -5211,7 +5706,7 @@
   }
  },
  {
-  "id": "pattern-observation-349",
+  "id": "pattern-observation-382",
   "category": "pattern-observation",
   "angle": "query observation='abc'",
   "argv": [
@@ -5226,7 +5721,7 @@
   }
  },
  {
-  "id": "pattern-observation-350",
+  "id": "pattern-observation-383",
   "category": "pattern-observation",
   "angle": "query observation='-1'",
   "argv": [
@@ -5241,7 +5736,7 @@
   }
  },
  {
-  "id": "pattern-observation-351",
+  "id": "pattern-observation-384",
   "category": "pattern-observation",
   "angle": "query observation='1.5'",
   "argv": [
@@ -5256,7 +5751,7 @@
   }
  },
  {
-  "id": "pattern-observation-352",
+  "id": "pattern-observation-385",
   "category": "pattern-observation",
   "angle": "query observation='1a'",
   "argv": [
@@ -5271,7 +5766,7 @@
   }
  },
  {
-  "id": "pattern-observation-353",
+  "id": "pattern-observation-386",
   "category": "pattern-observation",
   "angle": "query observation='1.0'",
   "argv": [
@@ -5286,7 +5781,7 @@
   }
  },
  {
-  "id": "pattern-observation-354",
+  "id": "pattern-observation-387",
   "category": "pattern-observation",
   "angle": "query observation='ten'",
   "argv": [
@@ -5301,7 +5796,7 @@
   }
  },
  {
-  "id": "pattern-observation-355",
+  "id": "pattern-observation-388",
   "category": "pattern-observation",
   "angle": "query observation='5 '",
   "argv": [
@@ -5316,7 +5811,7 @@
   }
  },
  {
-  "id": "pattern-observation-356",
+  "id": "pattern-observation-389",
   "category": "pattern-observation",
   "angle": "query observation=' 5'",
   "argv": [
@@ -5331,7 +5826,7 @@
   }
  },
  {
-  "id": "pattern-observation-357",
+  "id": "pattern-observation-390",
   "category": "pattern-observation",
   "angle": "query observation='0x5'",
   "argv": [
@@ -5346,7 +5841,7 @@
   }
  },
  {
-  "id": "conditional-358",
+  "id": "conditional-391",
   "category": "conditional",
   "angle": "query 无 observation/dates",
   "argv": [
@@ -5361,7 +5856,7 @@
   }
  },
  {
-  "id": "unknown-field-359",
+  "id": "unknown-field-392",
   "category": "unknown-field",
   "angle": "query 多传字段 windcode",
   "argv": [
@@ -5376,7 +5871,7 @@
   }
  },
  {
-  "id": "unknown-field-360",
+  "id": "unknown-field-393",
   "category": "unknown-field",
   "angle": "query 多传字段 period",
   "argv": [
@@ -5391,7 +5886,7 @@
   }
  },
  {
-  "id": "unknown-field-361",
+  "id": "unknown-field-394",
   "category": "unknown-field",
   "angle": "query 多传字段 foo",
   "argv": [
@@ -5406,7 +5901,7 @@
   }
  },
  {
-  "id": "unknown-field-362",
+  "id": "unknown-field-395",
   "category": "unknown-field",
   "angle": "query 多传字段 query",
   "argv": [
@@ -5421,7 +5916,7 @@
   }
  },
  {
-  "id": "unknown-field-363",
+  "id": "unknown-field-396",
   "category": "unknown-field",
   "angle": "query 多传字段 targetCurrency",
   "argv": [
@@ -5436,7 +5931,7 @@
   }
  },
  {
-  "id": "unknown-field-364",
+  "id": "unknown-field-397",
   "category": "unknown-field",
   "angle": "query 多传字段 targetMagnitude",
   "argv": [
@@ -5451,7 +5946,7 @@
   }
  },
  {
-  "id": "unknown-field-365",
+  "id": "unknown-field-398",
   "category": "unknown-field",
   "angle": "query 多传字段 targetFrequency",
   "argv": [
@@ -5466,7 +5961,7 @@
   }
  },
  {
-  "id": "unknown-field-366",
+  "id": "unknown-field-399",
   "category": "unknown-field",
   "angle": "search 多传字段 observation",
   "argv": [
@@ -5481,7 +5976,7 @@
   }
  },
  {
-  "id": "unknown-field-367",
+  "id": "unknown-field-400",
   "category": "unknown-field",
   "angle": "search 多传字段 beginDate",
   "argv": [
@@ -5496,7 +5991,7 @@
   }
  },
  {
-  "id": "unknown-field-368",
+  "id": "unknown-field-401",
   "category": "unknown-field",
   "angle": "search 多传字段 foo",
   "argv": [
@@ -5511,7 +6006,7 @@
   }
  },
  {
-  "id": "correct-369",
+  "id": "correct-402",
   "category": "correct",
   "angle": "search_stocks 合法",
   "argv": [
@@ -5525,7 +6020,7 @@
   }
  },
  {
-  "id": "correct-370",
+  "id": "correct-403",
   "category": "correct",
   "angle": "get_stock_basicinfo 合法",
   "argv": [
@@ -5539,7 +6034,7 @@
   }
  },
  {
-  "id": "correct-371",
+  "id": "correct-404",
   "category": "correct",
   "angle": "get_risk_metrics 合法",
   "argv": [
@@ -5553,7 +6048,7 @@
   }
  },
  {
-  "id": "correct-372",
+  "id": "correct-405",
   "category": "correct",
   "angle": "get_bond_basicinfo 合法",
   "argv": [
@@ -5567,7 +6062,7 @@
   }
  },
  {
-  "id": "correct-373",
+  "id": "correct-406",
   "category": "correct",
   "angle": "get_financial_data 合法",
   "argv": [
@@ -5581,7 +6076,7 @@
   }
  },
  {
-  "id": "correct-374",
+  "id": "correct-407",
   "category": "correct",
   "angle": "get_company_announcements 合法",
   "argv": [
@@ -5595,7 +6090,7 @@
   }
  },
  {
-  "id": "correct-375",
+  "id": "correct-408",
   "category": "correct",
   "angle": "get_financial_news 合法",
   "argv": [
@@ -5609,7 +6104,7 @@
   }
  },
  {
-  "id": "correct-376",
+  "id": "correct-409",
   "category": "correct",
   "angle": "get_stock_price_indicators 合法",
   "argv": [
@@ -5623,7 +6118,7 @@
   }
  },
  {
-  "id": "correct-377",
+  "id": "correct-410",
   "category": "correct",
   "angle": "get_fund_price_indicators 合法",
   "argv": [
@@ -5637,7 +6132,7 @@
   }
  },
  {
-  "id": "correct-378",
+  "id": "correct-411",
   "category": "correct",
   "angle": "get_index_price_indicators 合法",
   "argv": [
@@ -5651,7 +6146,7 @@
   }
  },
  {
-  "id": "correct-379",
+  "id": "correct-412",
   "category": "correct",
   "angle": "get_stock_kline 合法",
   "argv": [
@@ -5665,7 +6160,7 @@
   }
  },
  {
-  "id": "correct-380",
+  "id": "correct-413",
   "category": "correct",
   "angle": "get_fund_kline 合法",
   "argv": [
@@ -5679,7 +6174,7 @@
   }
  },
  {
-  "id": "correct-381",
+  "id": "correct-414",
   "category": "correct",
   "angle": "get_index_kline 合法",
   "argv": [
@@ -5693,7 +6188,49 @@
   }
  },
  {
-  "id": "correct-382",
+  "id": "correct-415",
+  "category": "correct",
+  "angle": "get_stock_kline count 整数",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_kline",
+   "{\"windcode\":\"600519.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":-5}"
+  ],
+  "expect": {
+   "ok": true
+  }
+ },
+ {
+  "id": "correct-416",
+  "category": "correct",
+  "angle": "get_fund_kline count 整数",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_kline",
+   "{\"windcode\":\"510300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":-5}"
+  ],
+  "expect": {
+   "ok": true
+  }
+ },
+ {
+  "id": "correct-417",
+  "category": "correct",
+  "angle": "get_index_kline count 整数",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_kline",
+   "{\"windcode\":\"000300.SH\",\"begin_date\":\"2026-08-03\",\"end_date\":\"2026-08-18\",\"count\":-5}"
+  ],
+  "expect": {
+   "ok": true
+  }
+ },
+ {
+  "id": "correct-418",
   "category": "correct",
   "angle": "get_stock_quote 合法(仅 windcode)",
   "argv": [
@@ -5707,7 +6244,7 @@
   }
  },
  {
-  "id": "correct-383",
+  "id": "correct-419",
   "category": "correct",
   "angle": "get_fund_quote 合法(仅 windcode)",
   "argv": [
@@ -5721,7 +6258,7 @@
   }
  },
  {
-  "id": "correct-384",
+  "id": "correct-420",
   "category": "correct",
   "angle": "get_index_quote 合法(仅 windcode)",
   "argv": [
@@ -5735,7 +6272,49 @@
   }
  },
  {
-  "id": "correct-385",
+  "id": "correct-421",
+  "category": "correct",
+  "angle": "get_stock_quote tradingday+count",
+  "argv": [
+   "call",
+   "stock_data",
+   "get_stock_quote",
+   "{\"windcode\":\"600519.SH\",\"tradingday\":\"2026-08-18\",\"count\":30}"
+  ],
+  "expect": {
+   "ok": true
+  }
+ },
+ {
+  "id": "correct-422",
+  "category": "correct",
+  "angle": "get_fund_quote tradingday+count",
+  "argv": [
+   "call",
+   "fund_data",
+   "get_fund_quote",
+   "{\"windcode\":\"510300.SH\",\"tradingday\":\"2026-08-18\",\"count\":30}"
+  ],
+  "expect": {
+   "ok": true
+  }
+ },
+ {
+  "id": "correct-423",
+  "category": "correct",
+  "angle": "get_index_quote tradingday+count",
+  "argv": [
+   "call",
+   "index_data",
+   "get_index_quote",
+   "{\"windcode\":\"000300.SH\",\"tradingday\":\"2026-08-18\",\"count\":30}"
+  ],
+  "expect": {
+   "ok": true
+  }
+ },
+ {
+  "id": "correct-424",
   "category": "correct",
   "angle": "search 合法",
   "argv": [
@@ -5749,7 +6328,7 @@
   }
  },
  {
-  "id": "correct-386",
+  "id": "correct-425",
   "category": "correct",
   "angle": "query 合法+observation",
   "argv": [
@@ -5763,7 +6342,7 @@
   }
  },
  {
-  "id": "correct-387",
+  "id": "correct-426",
   "category": "correct",
   "angle": "query 合法+dates",
   "argv": [
@@ -5777,7 +6356,7 @@
   }
  },
  {
-  "id": "correct-388",
+  "id": "correct-427",
   "category": "correct",
   "angle": "跨域改写 get_fund_quote@stock_data",
   "argv": [
@@ -5791,7 +6370,7 @@
   }
  },
  {
-  "id": "correct-389",
+  "id": "correct-428",
   "category": "correct",
   "angle": "跨域改写 get_index_kline@stock_data",
   "argv": [
